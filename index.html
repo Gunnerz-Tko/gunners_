@@ -3,84 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Oricon Books Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .tabs { display: flex; margin-bottom: 20px; }
+        .tab { padding: 10px; cursor: pointer; background-color: #f1f1f1; margin-right: 5px; }
+        .active { background-color: #ddd; }
+        .book-list { display: flex; flex-wrap: wrap; }
+        .book { width: 20%; padding: 10px; border: 1px solid #ccc; margin: 5px; }
+        .refresh-btn { margin: 20px 0; padding: 10px; }
+        .message { margin-top: 10px; }
+    </style>
 </head>
 <body>
-    <h1>Sales Dashboard</h1>
-    <button id="refreshButton">Refresh Sales Data</button>
-    <div id="loading" style="display:none;">Loading...</div>
-    <div id="message"></div>
-    <div id="lastUpdated"></div>
-
-    <h2>Sales Statistics</h2>
-    <div id="salesStats">
-        <p>Total Sales: <span id="totalSales">0</span></p>
-        <p>Total Revenue: $<span id="totalRevenue">0</span></p>
+    <h1>Oricon Books Dashboard</h1>
+    <div class="tabs">
+        <div class="tab active" onclick="loadGenre('all')">All</div>
+        <div class="tab" onclick="loadGenre('fiction')">Fiction</div>
+        <div class="tab" onclick="loadGenre('non-fiction')">Non-Fiction</div>
+        <div class="tab" onclick="loadGenre('manga')">Manga</div>
     </div>
-
-    <canvas id="salesChart"></canvas>
-
-    <h2>Top Products</h2>
-    <ol id="productList"></ol>
-
+    <div id="book-list" class="book-list"></div>
+    <button class="refresh-btn" onclick="refreshData()">Refresh</button>
+    <div id="message" class="message"></div>
     <script>
-        async function fetchSalesData() {
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('message').innerText = '';
-            try {
-                // Simulate fetching data
-                const response = await fetch('/api/sales'); // Replace with your actual API endpoint
-                const data = await response.json();
-                
-                // Update sales stats
-                document.getElementById('totalSales').innerText = data.totalSales;
-                document.getElementById('totalRevenue').innerText = data.totalRevenue;
-                document.getElementById('lastUpdated').innerText = 'Last Updated: ' + new Date().toUTCString();
+        const booksData = [
+            { title: 'Book Title 1', author: 'Author 1', sales: 1000, image: 'link_to_image1' },
+            { title: 'Book Title 2', author: 'Author 2', sales: 2000, image: 'link_to_image2' },
+            { title: 'Book Title 3', author: 'Author 3', sales: 3000, image: 'link_to_image3' },
+            { title: 'Book Title 4', author: 'Author 4', sales: 4000, image: 'link_to_image4' },
+            { title: 'Book Title 5', author: 'Author 5', sales: 5000, image: 'link_to_image5' },
+            { title: 'Book Title 6', author: 'Author 6', sales: 6000, image: 'link_to_image6' },
+            { title: 'Book Title 7', author: 'Author 7', sales: 7000, image: 'link_to_image7' },
+            { title: 'Book Title 8', author: 'Author 8', sales: 8000, image: 'link_to_image8' },
+            { title: 'Book Title 9', author: 'Author 9', sales: 9000, image: 'link_to_image9' },
+            { title: 'Book Title 10', author: 'Author 10', sales: 10000, image: 'link_to_image10' }
+        ];
 
-                // Update bar chart
-                const ctx = document.getElementById('salesChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: data.salesLabels,
-                        datasets: [{
-                            label: 'Sales',
-                            data: data.salesValues,
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
-                });
-
-                // Update product list with medals
-                const productList = document.getElementById('productList');
-                productList.innerHTML = '';
-                data.topProducts.forEach((product, index) => {
-                    const li = document.createElement('li');
-                    li.textContent = product.name;
-                    if (index < 3) { // Top 3 products
-                        li.innerHTML += ' 🥇🥈🥉'[index];
-                    }
-                    productList.appendChild(li);
-                });
-
-                document.getElementById('message').innerText = 'Data fetched successfully!';
-            } catch (error) {
-                document.getElementById('message').innerText = 'Error fetching data: ' + error.message;
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-            }
+        function loadGenre(genre) {
+            const bookList = document.getElementById('book-list');
+            bookList.innerHTML = '';
+            booksData.forEach(book => {
+                let bookElement = `<div class='book'>`
+                    + `<img src='${book.image}' alt='${book.title}' />`
+                    + `<h3>${book.title}</h3>`
+                    + `<p>${book.author}</p>`
+                    + `<p>Sales: ${book.sales}</p>`
+                    + `</div>`;
+                bookList.innerHTML += bookElement;
+            });
         }
 
-        document.getElementById('refreshButton').addEventListener('click', fetchSalesData);
-        fetchSalesData(); // Initial fetch
+        function refreshData() {
+            // Simulate a refresh success/error message
+            const messageElement = document.getElementById('message');
+            messageElement.innerHTML = 'Data refreshed successfully!';
+            messageElement.style.color = 'green';
+        }
+
+        loadGenre('all');
     </script>
 </body>
 </html>
