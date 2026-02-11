@@ -1,1 +1,1 @@
-{"top_sales": [{"product_id": 1, "product_name": "Product A", "sales": 150, "revenue": 3000}, {"product_id": 2, "product_name": "Product B", "sales": 200, "revenue": 4000}, {"product_id": 3, "product_name": "Product C", "sales": 100, "revenue": 2000}]}
+{"ventes": [{"nom": "Sample Product 1", "montant": 100},{"nom": "Sample Product 2", "montant": 200}]}
