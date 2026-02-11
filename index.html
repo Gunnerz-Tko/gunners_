@@ -160,7 +160,7 @@
                 contentContainer.appendChild(content);
             });
 
-            document.getElementById('weekInfo').textContent = `Week: ${data.week}`;
+            const updateDate = new Date(data.updated); const formattedDate = updateDate.toLocaleDateString('en-US', {      year: 'numeric',      month: 'long',      day: 'numeric',     hour: '2-digit',     minute: '2-digit' }); document.getElementById('weekInfo').innerHTML = `     <strong>Week 7, 2026</strong> | Last updated: ${formattedDate} `;
         }
 
         function renderBooks(books) {
