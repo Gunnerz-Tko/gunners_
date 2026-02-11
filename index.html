@@ -1,1 +1,86 @@
-<button id="refresh-button" onclick="fetchLatestSalesData()">Refresh Sales Data</button>\n<!-- Existing HTML content -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Sales Dashboard</h1>
+    <button id="refreshButton">Refresh Sales Data</button>
+    <div id="loading" style="display:none;">Loading...</div>
+    <div id="message"></div>
+    <div id="lastUpdated"></div>
+
+    <h2>Sales Statistics</h2>
+    <div id="salesStats">
+        <p>Total Sales: <span id="totalSales">0</span></p>
+        <p>Total Revenue: $<span id="totalRevenue">0</span></p>
+    </div>
+
+    <canvas id="salesChart"></canvas>
+
+    <h2>Top Products</h2>
+    <ol id="productList"></ol>
+
+    <script>
+        async function fetchSalesData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('message').innerText = '';
+            try {
+                // Simulate fetching data
+                const response = await fetch('/api/sales'); // Replace with your actual API endpoint
+                const data = await response.json();
+                
+                // Update sales stats
+                document.getElementById('totalSales').innerText = data.totalSales;
+                document.getElementById('totalRevenue').innerText = data.totalRevenue;
+                document.getElementById('lastUpdated').innerText = 'Last Updated: ' + new Date().toUTCString();
+
+                // Update bar chart
+                const ctx = document.getElementById('salesChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.salesLabels,
+                        datasets: [{
+                            label: 'Sales',
+                            data: data.salesValues,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+
+                // Update product list with medals
+                const productList = document.getElementById('productList');
+                productList.innerHTML = '';
+                data.topProducts.forEach((product, index) => {
+                    const li = document.createElement('li');
+                    li.textContent = product.name;
+                    if (index < 3) { // Top 3 products
+                        li.innerHTML += ' 🥇🥈🥉'[index];
+                    }
+                    productList.appendChild(li);
+                });
+
+                document.getElementById('message').innerText = 'Data fetched successfully!';
+            } catch (error) {
+                document.getElementById('message').innerText = 'Error fetching data: ' + error.message;
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        document.getElementById('refreshButton').addEventListener('click', fetchSalesData);
+        fetchSalesData(); // Initial fetch
+    </script>
+</body>
+</html>
