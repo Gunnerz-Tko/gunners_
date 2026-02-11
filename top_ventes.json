@@ -1,1 +1,1 @@
-{"ventes": [{"nom": "Sample Product 1", "montant": 100},{"nom": "Sample Product 2", "montant": 200}]}
+[{"name": "Product A", "sales": 150},{"name": "Product B", "sales": 250},{"name": "Product C", "sales": 300},{"name": "Product D", "sales": 200},{"name": "Product E", "sales": 100}]
