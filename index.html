@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sales Dashboard</title>
+    <title>Sakuragawa Japan Bestsellers</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* Add some CSS for styling the dashboard */
         body {
             font-family: Arial, sans-serif;
         }
@@ -33,7 +32,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Sales Dashboard</h1>
+        <h1>Sakuragawa Japan Bestsellers</h1>
         <div class="stats">
             <div class="stat-card" id="total-sales"></div>
             <div class="stat-card" id="average-sale"></div>
@@ -50,18 +49,16 @@
         fetch('top_ventes.json')
         .then(response => response.json())
         .then(data => {
-            // Example code to extract and display data
-            const totalSales = data.reduce((sum, sale) => sum + sale.amount, 0);
+            const totalSales = data.reduce((sum, sale) => sum + sale.sales, 0);
             const averageSale = totalSales / data.length;
             const totalItemsSold = data.length;
 
-            document.getElementById('total-sales').innerText = `Total Sales: $${totalSales}`;
-            document.getElementById('average-sale').innerText = `Average Sale: $${averageSale}`;
+            document.getElementById('total-sales').innerText = `Total Sales: ¥${totalSales}`;
+            document.getElementById('average-sale').innerText = `Average Sale: ¥${averageSale.toFixed(0)}`;
             document.getElementById('total-items-sold').innerText = `Total Items Sold: ${totalItemsSold}`;
             
-            // Prepare data for the chart
-            const labels = data.map(sale => sale.product);
-            const amounts = data.map(sale => sale.amount);
+            const labels = data.map(sale => sale.name);
+            const amounts = data.map(sale => sale.sales);
 
             const ctx = document.getElementById('salesChart').getContext('2d');
             new Chart(ctx, {
@@ -69,7 +66,7 @@
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'Sales Amount',
+                        label: 'Sales Amount (¥)',
                         data: amounts,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
@@ -85,12 +82,11 @@
                 }
             });
 
-            // Display sales ranking
-            data.sort((a, b) => b.amount - a.amount);
+            data.sort((a, b) => b.sales - a.sales);
             const salesRanking = document.getElementById('sales-ranking');
             data.forEach((sale, index) => {
                 const listItem = document.createElement('li');
-                listItem.textContent = `${index + 1}. ${sale.product} - $${sale.amount}`;
+                listItem.textContent = `${index + 1}. ${sale.name} - ¥${sale.sales}`;
                 salesRanking.appendChild(listItem);
             });
         })
