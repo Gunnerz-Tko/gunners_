@@ -4,44 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Sales Dashboard</h1>
-    </header>
-    <main>
-        <section id="charts">
-            <canvas id="salesChart"></canvas>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 Gunnerz-Tko</p>
-    </footer>
+    <h1>Sales Dashboard</h1>
+    <canvas id="salesChart" width="400" height="200"></canvas>
+    
     <script>
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        const salesChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-                datasets: [{
-                    label: 'Sales',
-                    data: [120, 190, 300, 250, 220, 400, 350],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
+        async function fetchSalesData() {
+            const response = await fetch('top_ventes.json');
+            const data = await response.json();
+            return data;
+        }
+
+        function renderChart(salesData) {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            const labels = salesData.map(item => item.product);
+            const data = salesData.map(item => item.amount);
+            
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Sales Amount',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        fetchSalesData().then(renderChart);
     </script>
 </body>
 </html>
