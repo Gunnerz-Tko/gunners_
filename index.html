@@ -5,30 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Add some CSS for styling the dashboard */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            width: 30%;
+        }
+        .chart-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Sales Dashboard</h1>
-    <canvas id="salesChart" width="400" height="200"></canvas>
+    <div class="container">
+        <h1>Sales Dashboard</h1>
+        <div class="stats">
+            <div class="stat-card" id="total-sales"></div>
+            <div class="stat-card" id="average-sale"></div>
+            <div class="stat-card" id="total-items-sold"></div>
+        </div>
+        <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+        </div>
+        <h2>Sales Ranking</h2>
+        <ol id="sales-ranking"></ol>
+    </div>
     
     <script>
-        async function fetchSalesData() {
-            const response = await fetch('top_ventes.json');
-            const data = await response.json();
-            return data;
-        }
+        fetch('top_ventes.json')
+        .then(response => response.json())
+        .then(data => {
+            // Example code to extract and display data
+            const totalSales = data.reduce((sum, sale) => sum + sale.amount, 0);
+            const averageSale = totalSales / data.length;
+            const totalItemsSold = data.length;
 
-        function renderChart(salesData) {
-            const ctx = document.getElementById('salesChart').getContext('2d');
-            const labels = salesData.map(item => item.product);
-            const data = salesData.map(item => item.amount);
+            document.getElementById('total-sales').innerText = `Total Sales: $${totalSales}`;
+            document.getElementById('average-sale').innerText = `Average Sale: $${averageSale}`;
+            document.getElementById('total-items-sold').innerText = `Total Items Sold: ${totalItemsSold}`;
             
-            const chart = new Chart(ctx, {
+            // Prepare data for the chart
+            const labels = data.map(sale => sale.product);
+            const amounts = data.map(sale => sale.amount);
+
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: 'Sales Amount',
-                        data: data,
+                        data: amounts,
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         borderWidth: 1
@@ -42,9 +84,17 @@
                     }
                 }
             });
-        }
 
-        fetchSalesData().then(renderChart);
+            // Display sales ranking
+            data.sort((a, b) => b.amount - a.amount);
+            const salesRanking = document.getElementById('sales-ranking');
+            data.forEach((sale, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${index + 1}. ${sale.product} - $${sale.amount}`;
+                salesRanking.appendChild(listItem);
+            });
+        })
+        .catch(error => console.error('Error loading the sales data:', error));
     </script>
 </body>
 </html>
