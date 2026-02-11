@@ -1,34 +1,45 @@
 {
   "updated": "2026-02-11T14:45:00Z",
-  "week": "2026",
+  "week": "Week 6 2026",
   "genres": {
     "All": [
-      {"rank": "1", "title": "Book 1", "author": "Author 1", "sales": 125000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "2", "title": "Book 2", "author": "Author 2", "sales": 98000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "3", "title": "Book 3", "author": "Author 3", "sales": 87500, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "4", "title": "Book 4", "author": "Author 4", "sales": 76200, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "5", "title": "Book 5", "author": "Author 5", "sales": 65800, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "6", "title": "Book 6", "author": "Author 6", "sales": 54300, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "7", "title": "Book 7", "author": "Author 7", "sales": 48900, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "8", "title": "Book 8", "author": "Author 8", "sales": 42100, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "9", "title": "Book 9", "author": "Author 9", "sales": 38500, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "10", "title": "Book 10", "author": "Author 10", "sales": 35200, "image": "https://via.placeholder.com/200x250"}
+      {"rank": "1", "title": "Book One", "author": "Author One", "sales": 125000, "image": "https://via.placeholder.com/200x250?text=Book1"},
+      {"rank": "2", "title": "Book Two", "author": "Author Two", "sales": 98000, "image": "https://via.placeholder.com/200x250?text=Book2"},
+      {"rank": "3", "title": "Book Three", "author": "Author Three", "sales": 87500, "image": "https://via.placeholder.com/200x250?text=Book3"},
+      {"rank": "4", "title": "Book Four", "author": "Author Four", "sales": 76200, "image": "https://via.placeholder.com/200x250?text=Book4"},
+      {"rank": "5", "title": "Book Five", "author": "Author Five", "sales": 65800, "image": "https://via.placeholder.com/200x250?text=Book5"},
+      {"rank": "6", "title": "Book Six", "author": "Author Six", "sales": 54300, "image": "https://via.placeholder.com/200x250?text=Book6"},
+      {"rank": "7", "title": "Book Seven", "author": "Author Seven", "sales": 48900, "image": "https://via.placeholder.com/200x250?text=Book7"},
+      {"rank": "8", "title": "Book Eight", "author": "Author Eight", "sales": 42100, "image": "https://via.placeholder.com/200x250?text=Book8"},
+      {"rank": "9", "title": "Book Nine", "author": "Author Nine", "sales": 38500, "image": "https://via.placeholder.com/200x250?text=Book9"},
+      {"rank": "10", "title": "Book Ten", "author": "Author Ten", "sales": 35200, "image": "https://via.placeholder.com/200x250?text=Book10"}
     ],
     "Fiction": [
-      {"rank": "1", "title": "Fiction 1", "author": "Writer 1", "sales": 120000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "2", "title": "Fiction 2", "author": "Writer 2", "sales": 95000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "3", "title": "Fiction 3", "author": "Writer 3", "sales": 85000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "4", "title": "Fiction 4", "author": "Writer 4", "sales": 75000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "5", "title": "Fiction 5", "author": "Writer 5", "sales": 65000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "6", "title": "Fiction 6", "author": "Writer 6", "sales": 55000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "7", "title": "Fiction 7", "author": "Writer 7", "sales": 45000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "8", "title": "Fiction 8", "author": "Writer 8", "sales": 35000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "9", "title": "Fiction 9", "author": "Writer 9", "sales": 25000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "10", "title": "Fiction 10", "author": "Writer 10", "sales": 15000, "image": "https://via.placeholder.com/200x250"}
+      {"rank": "1", "title": "Fiction One", "author": "Writer One", "sales": 120000, "image": "https://via.placeholder.com/200x250?text=Fiction1"},
+      {"rank": "2", "title": "Fiction Two", "author": "Writer Two", "sales": 95000, "image": "https://via.placeholder.com/200x250?text=Fiction2"},
+      {"rank": "3", "title": "Fiction Three", "author": "Writer Three", "sales": 85000, "image": "https://via.placeholder.com/200x250?text=Fiction3"},
+      {"rank": "4", "title": "Fiction Four", "author": "Writer Four", "sales": 75000, "image": "https://via.placeholder.com/200x250?text=Fiction4"},
+      {"rank": "5", "title": "Fiction Five", "author": "Writer Five", "sales": 65000, "image": "https://via.placeholder.com/200x250?text=Fiction5"},
+      {"rank": "6", "title": "Fiction Six", "author": "Writer Six", "sales": 55000, "image": "https://via.placeholder.com/200x250?text=Fiction6"},
+      {"rank": "7", "title": "Fiction Seven", "author": "Writer Seven", "sales": 45000, "image": "https://via.placeholder.com/200x250?text=Fiction7"},
+      {"rank": "8", "title": "Fiction Eight", "author": "Writer Eight", "sales": 35000, "image": "https://via.placeholder.com/200x250?text=Fiction8"},
+      {"rank": "9", "title": "Fiction Nine", "author": "Writer Nine", "sales": 25000, "image": "https://via.placeholder.com/200x250?text=Fiction9"},
+      {"rank": "10", "title": "Fiction Ten", "author": "Writer Ten", "sales": 15000, "image": "https://via.placeholder.com/200x250?text=Fiction10"}
     ],
     "Manga": [
-      {"rank": "1", "title": "Manga 1", "author": "Artist 1", "sales": 110000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "2", "title": "Manga 2", "author": "Artist 2", "sales": 90000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "3", "title": "Manga 3", "author": "Artist 3", "sales": 80000, "image": "https://via.placeholder.com/200x250"},
-      {"rank": "4", "title": "Manga 4", "author": "Artist 4", "sales": 70000, "image": "https://via.placeholder.com/200x](#)
+      {"rank": "1", "title": "Manga One", "author": "Artist One", "sales": 110000, "image": "https://via.placeholder.com/200x250?text=Manga1"},
+      {"rank": "2", "title": "Manga Two", "author": "Artist Two", "sales": 90000, "image": "https://via.placeholder.com/200x250?text=Manga2"},
+      {"rank": "3", "title": "Manga Three", "author": "Artist Three", "sales": 80000, "image": "https://via.placeholder.com/200x250?text=Manga3"},
+      {"rank": "4", "title": "Manga Four", "author": "Artist Four", "sales": 70000, "image": "https://via.placeholder.com/200x250?text=Manga4"},
+      {"rank": "5", "title": "Manga Five", "author": "Artist Five", "sales": 60000, "image": "https://via.placeholder.com/200x250?text=Manga5"},
+      {"rank": "6", "title": "Manga Six", "author": "Artist Six", "sales": 50000, "image": "https://via.placeholder.com/200x250?text=Manga6"},
+      {"rank": "7", "title": "Manga Seven", "author": "Artist Seven", "sales": 40000, "image": "https://via.placeholder.com/200x250?text=Manga7"},
+      {"rank": "8", "title": "Manga Eight", "author": "Artist Eight", "sales": 30000, "image": "https://via.placeholder.com/200x250?text=Manga8"},
+      {"rank": "9", "title": "Manga Nine", "author": "Artist Nine", "sales": 20000, "image": "https://via.placeholder.com/200x250?text=Manga9"},
+      {"rank": "10", "title": "Manga Ten", "author": "Artist Ten", "sales": 10000, "image": "https://via.placeholder.com/200x250?text=Manga10"}
+    ],
+    "Comics": [
+      {"rank": "1", "title": "Comic One", "author": "Creator One", "sales": 130000, "image": "https://via.placeholder.com/200x250?text=Comic1"},
+      {"rank": "2", "title": "Comic Two", "author": "Creator Two", "sales": 100000, "image": "https://via.placeholder.com/200x250?text=Comic2"},
+      {"rank": "3", "title": "Comic Three", "author": "Creator Three", "sales": 90](#)
 
