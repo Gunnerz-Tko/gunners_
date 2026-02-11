@@ -1,1 +1,166 @@
-{\n  "総合": [\n    {\n      "rank": 1,\n      "title": "General Book 1",\n      "author": "Author A",\n      "sales": 10000,\n      "image": "url_to_image_1",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 2,\n      "title": "General Book 2",\n      "author": "Author B",\n      "sales": 9500,\n      "image": "url_to_image_2",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 3,\n      "title": "General Book 3",\n      "author": "Author C",\n      "sales": 9000,\n      "image": "url_to_image_3",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 4,\n      "title": "General Book 4",\n      "author": "Author D",\n      "sales": 8500,\n      "image": "url_to_image_4",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 5,\n      "title": "General Book 5",\n      "author": "Author E",\n      "sales": 8000,\n      "image": "url_to_image_5",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 6,\n      "title": "General Book 6",\n      "author": "Author F",\n      "sales": 7500,\n      "image": "url_to_image_6",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 7,\n      "title": "General Book 7",\n      "author": "Author G",\n      "sales": 7000,\n      "image": "url_to_image_7",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 8,\n      "title": "General Book 8",\n      "author": "Author H",\n      "sales": 6500,\n      "image": "url_to_image_8",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 9,\n      "title": "General Book 9",\n      "author": "Author I",\n      "sales": 6000,\n      "image": "url_to_image_9",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 10,\n      "title": "General Book 10",\n      "author": "Author J",\n      "sales": 5500,\n      "image": "url_to_image_10",\n      "week": "2026-02-01"\n    }\n  ],\n  "文芸": [\n    {\n      "rank": 1,\n      "title": "Literary Book 1",\n      "author": "Author K",\n      "sales": 12000,\n      "image": "url_to_image_11",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 2,\n      "title": "Literary Book 2",\n      "author": "Author L",\n      "sales": 11500,\n      "image": "url_to_image_12",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 3,\n      "title": "Literary Book 3",\n      "author": "Author M",\n      "sales": 11000,\n      "image": "url_to_image_13",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 4,\n      "title": "Literary Book 4",\n      "author": "Author N",\n      "sales": 10500,\n      "image": "url_to_image_14",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 5,\n      "title": "Literary Book 5",\n      "author": "Author O",\n      "sales": 10000,\n      "image": "url_to_image_15",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 6,\n      "title": "Literary Book 6",\n      "author": "Author P",\n      "sales": 9500,\n      "image": "url_to_image_16",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 7,\n      "title": "Literary Book 7",\n      "author": "Author Q",\n      "sales": 9000,\n      "image": "url_to_image_17",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 8,\n      "title": "Literary Book 8",\n      "author": "Author R",\n      "sales": 8500,\n      "image": "url_to_image_18",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 9,\n      "title": "Literary Book 9",\n      "author": "Author S",\n      "sales": 8000,\n      "image": "url_to_image_19",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 10,\n      "title": "Literary Book 10",\n      "author": "Author T",\n      "sales": 7500,\n      "image": "url_to_image_20",\n      "week": "2026-02-01"\n    }\n  ],\n  "ライトノベル": [\n    {\n      "rank": 1,\n      "title": "Light Novel 1",\n      "author": "Author U",\n      "sales": 14000,\n      "image": "url_to_image_21",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 2,\n      "title": "Light Novel 2",\n      "author": "Author V",\n      "sales": 13500,\n      "image": "url_to_image_22",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 3,\n      "title": "Light Novel 3",\n      "author": "Author W",\n      "sales": 13000,\n      "image": "url_to_image_23",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 4,\n      "title": "Light Novel 4",\n      "author": "Author X",\n      "sales": 12500,\n      "image": "url_to_image_24",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 5,\n      "title": "Light Novel 5",\n      "author": "Author Y",\n      "sales": 12000,\n      "image": "url_to_image_25",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 6,\n      "title": "Light Novel 6",\n      "author": "Author Z",\n      "sales": 11500,\n      "image": "url_to_image_26",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 7,\n      "title": "Light Novel 7",\n      "author": "Author AA",\n      "sales": 11000,\n      "image": "url_to_image_27",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 8,\n      "title": "Light Novel 8",\n      "author": "Author AB",\n      "sales": 10500,\n      "image": "url_to_image_28",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 9,\n      "title": "Light Novel 9",\n      "author": "Author AC",\n      "sales": 10000,\n      "image": "url_to_image_29",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 10,\n      "title": "Light Novel 10",\n      "author": "Author AD",\n      "sales": 9500,\n      "image": "url_to_image_30",\n      "week": "2026-02-01"\n    }\n  ],\n  "コミック": [\n    {\n      "rank": 1,\n      "title": "Comic 1",\n      "author": "Author AE",\n      "sales": 16000,\n      "image": "url_to_image_31",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 2,\n      "title": "Comic 2",\n      "author": "Author AF",\n      "sales": 15500,\n      "image": "url_to_image_32",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 3,\n      "title": "Comic 3",\n      "author": "Author AG",\n      "sales": 15000,\n      "image": "url_to_image_33",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 4,\n      "title": "Comic 4",\n      "author": "Author AH",\n      "sales": 14500,\n      "image": "url_to_image_34",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 5,\n      "title": "Comic 5",\n      "author": "Author AI",\n      "sales": 14000,\n      "image": "url_to_image_35",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 6,\n      "title": "Comic 6",\n      "author": "Author AJ",\n      "sales": 13500,\n      "image": "url_to_image_36",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 7,\n      "title": "Comic 7",\n      "author": "Author AK",\n      "sales": 13000,\n      "image": "url_to_image_37",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 8,\n      "title": "Comic 8",\n      "author": "Author AL",\n      "sales": 12500,\n      "image": "url_to_image_38",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 9,\n      "title": "Comic 9",\n      "author": "Author AM",\n      "sales": 12000,\n      "image": "url_to_image_39",\n      "week": "2026-02-01"\n    },\n    {\n      "rank": 10,\n      "title": "Comic 10",\n      "author": "Author AN",\n      "sales": 11500,\n      "image": "url_to_image_40",\n      "week": "2026-02-01"\n    }\n  ]\n}
+{
+  "updated": "2026-02-11T14:45:00Z",
+  "week": "2026年2月11週",
+  "genres": {
+    "総合": [
+      {
+        "rank": "1",
+        "title": "君のそばで恋をしている",
+        "author": "青山美咲",
+        "sales": 125000,
+        "image": "https://ranking.oricon.co.jp/img/book/125000.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "2",
+        "title": "魔法の書物",
+        "author": "田中太郎",
+        "sales": 98000,
+        "image": "https://ranking.oricon.co.jp/img/book/124999.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "3",
+        "title": "星降る夜のメロディ",
+        "author": "鈴木花子",
+        "sales": 87500,
+        "image": "https://ranking.oricon.co.jp/img/book/124998.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "4",
+        "title": "ドラゴンスレイヤー",
+        "author": "高橋健太",
+        "sales": 76200,
+        "image": "https://ranking.oricon.co.jp/img/book/124997.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "5",
+        "title": "時空の旅人",
+        "author": "渡辺美優",
+        "sales": 65800,
+        "image": "https://ranking.oricon.co.jp/img/book/124996.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "6",
+        "title": "王妃の秘密",
+        "author": "伊藤由美",
+        "sales": 54300,
+        "image": "https://ranking.oricon.co.jp/img/book/124995.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "7",
+        "title": "少年探偵団の事件簿",
+        "author": "山本次郎",
+        "sales": 48900,
+        "image": "https://ranking.oricon.co.jp/img/book/124994.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "8",
+        "title": "海底の秘宝",
+        "author": "中村康夫",
+        "sales": 42100,
+        "image": "https://ranking.oricon.co.jp/img/book/124993.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "9",
+        "title": "月光の詩集",
+        "author": "佐藤詩織",
+        "sales": 38500,
+        "image": "https://ranking.oricon.co.jp/img/book/124992.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "10",
+        "title": "森の妖精たち",
+        "author": "木村麗美",
+        "sales": 35200,
+        "image": "https://ranking.oricon.co.jp/img/book/124991.jpg",
+        "week": "2026年2月11週"
+      }
+    ],
+    "文芸": [
+      {
+        "rank": "1",
+        "title": "君のそばで恋をしている",
+        "author": "青山美咲",
+        "sales": 125000,
+        "image": "https://ranking.oricon.co.jp/img/book/125000.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "2",
+        "title": "王妃の秘密",
+        "author": "伊藤由美",
+        "sales": 54300,
+        "image": "https://ranking.oricon.co.jp/img/book/124995.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "3",
+        "title": "月光の詩集",
+        "author": "佐藤詩織",
+        "sales": 38500,
+        "image": "https://ranking.oricon.co.jp/img/book/124992.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "4",
+        "title": "森の妖精たち",
+        "author": "木村麗美",
+        "sales": 35200,
+        "image": "https://ranking.oricon.co.jp/img/book/124991.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "5",
+        "title": "愛の物語",
+        "author": "遠藤薫",
+        "sales": 32100,
+        "image": "https://ranking.oricon.co.jp/img/book/124990.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "6",
+        "title": "春風の手紙",
+        "author": "小林美香",
+        "sales": 28900,
+        "image": "https://ranking.oricon.co.jp/img/book/124989.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "7",
+        "title": "夢の中の城",
+        "author": "田辺健二",
+        "sales": 25600,
+        "image": "https://ranking.oricon.co.jp/img/book/124988.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "8",
+        "title": "心の奥底",
+        "author": "西田由紀",
+        "sales": 22400,
+        "image": "https://ranking.oricon.co.jp/img/book/124987.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "9",
+        "title": "明日への希望",
+        "author": "石川慎一",
+        "sales": 19800,
+        "image": "https://ranking.oricon.co.jp/img/book/124986.jpg",
+        "week": "2026年2月11週"
+      },
+      {
+        "rank": "10",
+        "title": "静寂の声",
+        "author": "吉田香織",
+        "sales": 17300,
+        "image": "https://ranking.oricon.co.](#)
+
