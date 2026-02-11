@@ -3,261 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oricon Books - Top 10 par Genre</title>
+    <title>Oricon Books - Top 10 Rankings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            min-height: 100vh; 
-            padding: 20px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .container { 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            background: white; 
-            border-radius: 12px; 
-            padding: 30px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #f59e0b;
+            --bg-dark: #0f172a;
+            --bg-light: #f8fafc;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
         }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { color: #333; font-size: 2.5em; margin-bottom: 10px; }
-        .info { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-            gap: 20px;
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1e3a8a 100%);
+            min-height: 100vh;
+            color: var(--text-dark);
+            overflow-x: hidden;
         }
-        .week { color: #666; font-size: 0.95em; }
-        .refresh-btn { 
-            padding: 10px 20px; 
-            background-color: #4CAF50; 
-            color: white; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .refresh-btn:hover { background-color: #45a049; }
-        .refresh-btn:disabled { background-color: #cccccc; cursor: not-allowed; }
-        .message { 
-            padding: 12px; 
-            margin-bottom: 15px; 
-            border-radius: 5px; 
-            text-align: center; 
-            display: none; 
-        }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-        .tabs { 
-            display: flex; 
-            gap: 10px; 
-            margin-bottom: 30px; 
-            flex-wrap: wrap;
-            border-bottom: 2px solid #eee;
-        }
-        .tab-btn { 
-            padding: 12px 20px; 
-            background: white; 
-            border: none; 
-            cursor: pointer; 
-            font-weight: 600;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        .tab-btn:hover { background-color: #f5f5f5; }
-        .tab-btn.active { 
-            color: #667eea; 
-            border-bottom-color: #667eea;
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .books-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 20px;
-        }
-        .book-card { 
-            background: #f9f9f9; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .book-card:hover { transform: translateY(-5px); }
-        .book-image { 
-            width: 100%; 
-            height: 250px; 
-            object-fit: cover; 
-            background: #e0e0e0;
-        }
-        .book-info { padding: 15px; }
-        .rank { 
-            display: inline-block; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white; 
-            padding: 5px 10px; 
-            border-radius: 5px; 
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .title { 
-            font-weight: bold; 
-            color: #333; 
-            margin-bottom: 5px;
-            line-height: 1.4;
-            font-size: 0.95em;
-        }
-        .author { 
-            color: #666; 
-            font-size: 0.85em; 
-            margin-bottom: 10px;
-        }
-        .sales { 
-            color: #4CAF50; 
-            font-weight: bold;
-            font-size: 0.9em;
-        }
-        .empty { 
-            text-align: center; 
-            color: #999; 
-            padding: 40px;
-        }
-        .loading {
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px 20px;
             text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 18px;
+            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
         }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>📚 Oricon Books - Top 10 par Genre</h1>
-        </header>
 
-        <div class="info">
-            <div class="week" id="weekInfo">Chargement...</div>
-            <button class="refresh-btn" id="refreshBtn" onclick="refreshData()">🔄 Rafraîchir les données</button>
-        </div>
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
 
-        <div id="successMsg" class="message success"></div>
-        <div id="errorMsg" class="message error"></div>
+        header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1;
+        }
 
-        <div id="loading" class="loading">⏳ Chargement des données...</div>
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
 
-        <div id="tabsContainer"></div>
-        <div id="contentContainer"></div>
-    </div>
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
 
-    <script>
-        let allData = null;
+        /* Info Bar */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            gap: 20px;
+            flex-wrap: wrap;
+        }
 
-        function showMessage(type, message) {
-            const successMsg = document.getElementById('successMsg');
-            const errorMsg = document.getElementById('errorMsg');
-            
-            if (type === 'success') {
-                successMsg.textContent = message;
-                successMsg.style.display = 'block';
-                errorMsg.style.display = 'none';
-                setTimeout(() => { successMsg.style.display = 'none'; }, 3000);
-            } else if (type === 'error') {
-                errorMsg.textContent = message;
-                errorMsg.style.display = 'block';
-                successMsg.style.display = 'none';
+        .week-info {
+            font-size: 1.1em;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .week-info span {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .refresh-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .refresh-btn:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Messages */
+        .message {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            display: none;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        async function refreshData() {
-            const btn = document.getElementById('refreshBtn');
-            btn.disabled = true;
-            btn.textContent = '⏳ Chargement...';
-
-            try {
-                const response = await fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/oricon_books.json?t=' + Date.now());
-                if (!response.ok) throw new Error('Impossible de charger les données (HTTP ' + response.status + ')');
-                
-                allData = await response.json();
-                console.log('Data loaded:', allData);
-                displayDashboard();
-                showMessage('success', '✅ Données mises à jour avec succès!');
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage('error', `❌ Erreur: ${error.message}`);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '🔄 Rafraîchir les données';
-            }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
         }
 
-        function displayDashboard() {
-            const loading = document.getElementById('loading');
-            loading.style.display = 'none';
-
-            if (allData && allData.week) {
-                document.getElementById('weekInfo').textContent = `Semaine: ${allData.week} | Mise à jour: ${allData.updated}`;
-            }
-
-            const genres = Object.keys(allData.genres || {});
-            const tabsContainer = document.getElementById('tabsContainer');
-            const contentContainer = document.getElementById('contentContainer');
-            tabsContainer.innerHTML = '';
-            contentContainer.innerHTML = '';
-
-            if (genres.length === 0) {
-                contentContainer.innerHTML = '<div class="empty">❌ Aucun genre trouvé</div>';
-                return;
-            }
-
-            genres.forEach((genre, index) => {
-                const btn = document.createElement('button');
-                btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
-                btn.textContent = genre;
-                btn.onclick = () => switchTab(genre);
-                tabsContainer.appendChild(btn);
-
-                const content = document.createElement('div');
-                content.className = `tab-content ${index === 0 ? 'active' : ''}`;
-                content.id = `tab-${genre}`;
-                content.innerHTML = renderBooks(allData.genres[genre]);
-                contentContainer.appendChild(content);
-            });
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
         }
 
-        function renderBooks(books) {
-            if (!books || books.length === 0) {
-                return '<div class="empty">Pas de données</div>';
-            }
-
-            const html = '<div class="books-grid">' +
-                books.map(book => `
-                    <div class="book-card">
-                        <img src="${book.image || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22250%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22200%22 height=%22250%22/%3E%3C/svg%3E'}" alt="${book.title}" class="book-image" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22250%22%3E%3Crect fill=%22%23e0e0e0%22 width=%22200%22 height=%22250%22/%3E%3C/svg%3E'">
-                        <div class="book-info">
-                            <div class="rank">#${book.rank}</div>
-                            <div class="title">${book.title}</div>
-                            <div class="author">par ${book.author}</div>
-                            <div class="sales">${parseInt(book.sales).toLocaleString('fr-FR')} ventes</div>
-                        </div>
-                    </div>
-                `).join('') +
-                '</div>';
-            return html;
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         }
 
-        function switchTab(genre) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(`tab-${genre}`).classList.add('active');
-        }
-
-        window.addEventListener('DOMContentLoaded', refreshData);
-    </script>
-</body>
-</html>
+        .tab-btn {
+            padding: 12px 25*
+
