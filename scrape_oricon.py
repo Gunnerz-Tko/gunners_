@@ -25,50 +25,84 @@ def scrape_oricon_category(category_url):
         soup = BeautifulSoup(response.content, 'html.parser')
         books = []
         
-        # Find all rank item rows
+        # Try multiple selectors for rank items
         rank_items = soup.select('tr.rank_item')
-        print(f"Found {len(rank_items)} items")
+        if not rank_items:
+            rank_items = soup.select('table tr[class*="rank"]')
+        if not rank_items:
+            rank_items = soup.select('tbody tr')
+            
+        print(f"Found {len(rank_items)} potential rank items")
+        
+        # Debug: Print first item HTML
+        if rank_items:
+            print("\nFirst item HTML:")
+            print(rank_items[0].prettify()[:500])
         
         for idx, item in enumerate(rank_items[:10], 1):
             try:
-                # Rank (from the row number or explicit rank cell)
-                rank_elem = item.select_one('td.rank_num')
-                rank = rank_elem.text.strip() if rank_elem else str(idx)
-                rank = rank.replace('位', '').strip()
+                # Try different selectors for rank
+                rank = str(idx)
+                for rank_selector in ['td:nth-child(1)', '.rank_num', 'td[class*="rank"]']:
+                    rank_elem = item.select_one(rank_selector)
+                    if rank_elem:
+                        rank = rank_elem.text.strip().replace('位', '').strip()
+                        break
                 
                 # Book cover image
-                img_elem = item.select_one('td img')
-                image = img_elem.get('src', '') if img_elem else ""
-                if image and not image.startswith('http'):
-                    image = 'https://www.oricon.co.jp' + image
+                image = ""
+                for img_selector in ['img', 'img[alt]', 'td:nth-child(2) img']:
+                    img_elem = item.select_one(img_selector)
+                    if img_elem:
+                        image = img_elem.get('src', '')
+                        if image and not image.startswith('http'):
+                            image = 'https://www.oricon.co.jp' + image
+                        break
                 
-                # Book Title
-                title_elem = item.select_one('td.title a')
-                title = title_elem.text.strip() if title_elem else "Unknown"
+                # Book Title - try multiple selectors
+                title = "Unknown"
+                for title_selector in ['.title a', 'td:nth-child(3) a', 'td:nth-child(4) a', 'a[href*="/product/"]']:
+                    title_elem = item.select_one(title_selector)
+                    if title_elem:
+                        title = title_elem.text.strip()
+                        break
                 
                 # Publisher
-                publisher_elem = item.select_one('td.publisher')
-                publisher = publisher_elem.text.strip() if publisher_elem else "Unknown"
+                publisher = "Unknown"
+                for pub_selector in ['.publisher', 'td:nth-child(5)', 'td:nth-child(6)']:
+                    pub_elem = item.select_one(pub_selector)
+                    if pub_elem:
+                        publisher = pub_elem.text.strip()
+                        break
                 
                 # Release Date
-                release_date_elem = item.select_one('td.release_date')
-                release_date = release_date_elem.text.strip() if release_date_elem else "Unknown"
+                release_date = "Unknown"
+                for date_selector in ['.release_date', 'td:nth-child(6)', 'td:nth-child(7)']:
+                    date_elem = item.select_one(date_selector)
+                    if date_elem:
+                        release_date = date_elem.text.strip()
+                        break
                 
                 # Estimated Sales
-                sales_elem = item.select_one('td.sales')
-                sales = sales_elem.text.strip() if sales_elem else "0"
-                sales = sales.replace(',', '').replace('万', '0000').split()[0] if sales else "0"
+                sales = "0"
+                for sales_selector in ['.sales', 'td:nth-child(7)', 'td:nth-child(8)']:
+                    sales_elem = item.select_one(sales_selector)
+                    if sales_elem:
+                        sales = sales_elem.text.strip()
+                        sales = sales.replace(',', '').replace('万', '0000').split()[0]
+                        break
                 
-                book = {
-                    "rank": rank,
-                    "title": title,
-                    "publisher": publisher,
-                    "release_date": release_date,
-                    "sales": sales,
-                    "image": image
-                }
-                books.append(book)
-                print(f"  #{rank}: {title} - {publisher}")
+                if title != "Unknown":  # Only add if we found a title
+                    book = {
+                        "rank": rank,
+                        "title": title,
+                        "publisher": publisher,
+                        "release_date": release_date,
+                        "sales": sales,
+                        "image": image
+                    }
+                    books.append(book)
+                    print(f"✓ #{rank}: {title}")
                 
             except Exception as e:
                 print(f"Error parsing book entry {idx}: {e}")
@@ -98,17 +132,19 @@ def main():
     }
     
     for category_name, url in categories.items():
+        print(f"\n{'='*60}")
         print(f"Scraping {category_name}...")
         print(f"URL: {url}")
+        print('='*60)
         books = scrape_oricon_category(url)
         data["genres"][category_name] = books
-        print(f"✓ Found {len(books)} books in {category_name}\n")
+        print(f"✓ Found {len(books)} books in {category_name}")
     
     # Save to JSON file
     with open('oricon_books.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print("✅ Data saved to oricon_books.json")
+    print("\n✅ Data saved to oricon_books.json")
 
 if __name__ == "__main__":
     main()
