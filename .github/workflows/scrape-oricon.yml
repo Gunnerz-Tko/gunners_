@@ -1,0 +1,34 @@
+name: Scrape Oricon Rankings
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4
+      
+      - name: Run Oricon scraper
+        run: python scrape_oricon.py
+      
+      - name: Commit and push
+        run: |
+          git config user.name "Oricon Scraper Bot"
+          git config user.email "bot@github.com"
+          git add oricon_books.json
+          git commit -m "Update Oricon rankings - $(date)" || true
+          git push
