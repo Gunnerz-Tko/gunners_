@@ -39,7 +39,6 @@ def scrape_oricon_category(category_url):
                 # Book cover image
                 img_elem = item.select_one('td img')
                 image = img_elem.get('src', '') if img_elem else ""
-                # Convert to full URL if relative
                 if image and not image.startswith('http'):
                     image = 'https://www.oricon.co.jp' + image
                 
@@ -58,7 +57,6 @@ def scrape_oricon_category(category_url):
                 # Estimated Sales
                 sales_elem = item.select_one('td.sales')
                 sales = sales_elem.text.strip() if sales_elem else "0"
-                # Remove commas and extract just the number
                 sales = sales.replace(',', '').replace('万', '0000').split()[0] if sales else "0"
                 
                 book = {
@@ -86,4 +84,31 @@ def main():
     print(f"Scraping Oricon data for week of {week_date}...\n")
     
     categories = {
-        "Comics": f
+        "Comics": f"https://www.oricon.co.jp/rank/obc/w/{week_date}/",
+        "Light Novels": f"https://www.oricon.co.jp/rank/obl/w/{week_date}/",
+        "Light Literature": f"https://www.oricon.co.jp/rank/obll/w/{week_date}/",
+        "Literary Books": f"https://www.oricon.co.jp/rank/oba/w/{week_date}/"
+    }
+    
+    data = {
+        "updated": datetime.now().isoformat() + "Z",
+        "week": f"Week {datetime.now().isocalendar()[1]} {datetime.now().year}",
+        "genres": {},
+        "total_genres": len(categories)
+    }
+    
+    for category_name, url in categories.items():
+        print(f"Scraping {category_name}...")
+        print(f"URL: {url}")
+        books = scrape_oricon_category(url)
+        data["genres"][category_name] = books
+        print(f"✓ Found {len(books)} books in {category_name}\n")
+    
+    # Save to JSON file
+    with open('oricon_books.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    
+    print("✅ Data saved to oricon_books.json")
+
+if __name__ == "__main__":
+    main()
