@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 from datetime import datetime
-import time
+import difflib
 
 def load_corrections():
     """Load corrections from books_corrections.json"""
@@ -15,11 +15,25 @@ def load_corrections():
         return {}
 
 def find_correction(title, corrections_by_genre):
-    """Find correction for a title"""
+    """Find correction for a title with fuzzy matching"""
+    
+    # Normalize title (remove extra spaces)
+    title_normalized = ' '.join(title.split())
+    
     for genre, books in corrections_by_genre.items():
         for book in books:
-            if book['title'].lower() == title.lower():
+            book_title = book['title']
+            book_title_normalized = ' '.join(book_title.split())
+            
+            # Exact match
+            if title_normalized.lower() == book_title_normalized.lower():
                 return book
+            
+            # Fuzzy match (90% similarity)
+            similarity = difflib.SequenceMatcher(None, title_normalized.lower(), book_title_normalized.lower()).ratio()
+            if similarity > 0.9:
+                return book
+    
     return None
 
 def scrape_nippan_books():
