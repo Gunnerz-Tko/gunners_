@@ -13,9 +13,9 @@ def scrape_oricon_category(category_url):
     """Scrape Oricon data for a specific category"""
     try:
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
-        response = requests.get(category_url, headers=headers, timeout=10)
+        response = requests.get(category_url, headers=headers, timeout=15)
         response.encoding = 'utf-8'
         
         if response.status_code != 200:
@@ -25,38 +25,55 @@ def scrape_oricon_category(category_url):
         soup = BeautifulSoup(response.content, 'html.parser')
         books = []
         
-        # Find all book entries
-        rank = 1
-        for item in soup.select('tr.rank_item')[:10]:  # Get top 10
+        # Find all rank item rows
+        rank_items = soup.select('tr.rank_item')
+        print(f"Found {len(rank_items)} items")
+        
+        for idx, item in enumerate(rank_items[:10], 1):
             try:
-                # Title
-                title_elem = item.select_one('td:nth-child(3) a')
+                # Rank (from the row number or explicit rank cell)
+                rank_elem = item.select_one('td.rank_num')
+                rank = rank_elem.text.strip() if rank_elem else str(idx)
+                rank = rank.replace('位', '').strip()
+                
+                # Book cover image
+                img_elem = item.select_one('td img')
+                image = img_elem.get('src', '') if img_elem else ""
+                # Convert to full URL if relative
+                if image and not image.startswith('http'):
+                    image = 'https://www.oricon.co.jp' + image
+                
+                # Book Title
+                title_elem = item.select_one('td.title a')
                 title = title_elem.text.strip() if title_elem else "Unknown"
                 
-                # Author
-                author_elem = item.select_one('td:nth-child(4) a')
-                author = author_elem.text.strip() if author_elem else "Unknown"
+                # Publisher
+                publisher_elem = item.select_one('td.publisher')
+                publisher = publisher_elem.text.strip() if publisher_elem else "Unknown"
                 
-                # Sales
-                sales_elem = item.select_one('td:nth-child(5)')
-                sales = sales_elem.text.strip().replace(',', '') if sales_elem else "0"
+                # Release Date
+                release_date_elem = item.select_one('td.release_date')
+                release_date = release_date_elem.text.strip() if release_date_elem else "Unknown"
                 
-                # Image
-                img_elem = item.select_one('img')
-                image = img_elem.get('src', '') if img_elem else ""
+                # Estimated Sales
+                sales_elem = item.select_one('td.sales')
+                sales = sales_elem.text.strip() if sales_elem else "0"
+                # Remove commas and extract just the number
+                sales = sales.replace(',', '').replace('万', '0000').split()[0] if sales else "0"
                 
                 book = {
                     "rank": rank,
                     "title": title,
-                    "author": author,
+                    "publisher": publisher,
+                    "release_date": release_date,
                     "sales": sales,
                     "image": image
                 }
                 books.append(book)
-                rank += 1
+                print(f"  #{rank}: {title} - {publisher}")
                 
             except Exception as e:
-                print(f"Error parsing book entry: {e}")
+                print(f"Error parsing book entry {idx}: {e}")
                 continue
         
         return books
@@ -66,33 +83,8 @@ def scrape_oricon_category(category_url):
 
 def main():
     week_date = get_week_date()
-    print(f"Scraping Oricon data for week of {week_date}...")
+    print(f"Scraping Oricon data for week of {week_date}...\n")
     
     categories = {
-        "Comics": f"https://www.oricon.co.jp/rank/obc/w/{week_date}/",
-        "Light Novels": f"https://www.oricon.co.jp/rank/obl/w/{week_date}/",
-        "Light Literature": f"https://www.oricon.co.jp/rank/obll/w/{week_date}/",
-        "Literary Books": f"https://www.oricon.co.jp/rank/oba/w/{week_date}/"
-    }
-    
-    data = {
-        "updated": datetime.now().isoformat() + "Z",
-        "week": f"Week {datetime.now().isocalendar()[1]} {datetime.now().year}",
-        "genres": {},
-        "total_genres": len(categories)
-    }
-    
-    for category_name, url in categories.items():
-        print(f"Scraping {category_name}...")
-        books = scrape_oricon_category(url)
-        data["genres"][category_name] = books
-        print(f"✓ Found {len(books)} books in {category_name}")
-    
-    # Save to JSON file
-    with open('oricon_books.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    
-    print("\n✅ Data saved to oricon_books.json")
-
-if __name__ == "__main__":
-    main()
+        "Comics": f
+
