@@ -52,6 +52,12 @@ def get_book_info_from_honyaclub(title, nippan_link):
         if not author_elem:
             author_elem = soup.find('span', class_='author')
         if not author_elem:
+            # Look in detail table
+            for th in soup.find_all('th'):
+                if '著者' in th.get_text() or '作者' in th.get_text():
+                    author_elem = th.find_next('td')
+                    break
+        if not author_elem:
             # Look for 著者 (author) text
             author_elem = soup.find(string=re.compile('著者|作者'))
             if author_elem:
@@ -61,40 +67,63 @@ def get_book_info_from_honyaclub(title, nippan_link):
             author = author_elem.get_text(strip=True)
             author = re.sub(r'著者:|著|作|編|訳', '', author).strip()
         
-        # Extract publisher
+        # Extract publisher - MORE AGGRESSIVE SEARCH
         publisher = "-"
-        # Try multiple selectors for publisher
-        publisher_elem = soup.find('div', class_='publisher')
-        if not publisher_elem:
-            publisher_elem = soup.find('span', class_='publisher')
-        if not publisher_elem:
-            # Look for 出版社 (publisher) text
-            publisher_elem = soup.find(string=re.compile('出版社|出版'))
-            if publisher_elem:
-                publisher_elem = publisher_elem.find_next('span')
         
-        if publisher_elem:
-            publisher = publisher_elem.get_text(strip=True)
-            publisher = re.sub(r'出版社:|出版:', '', publisher).strip()
+        # Method 1: Look in the product details table
+        details_table = soup.find('table', class_='productDetails')
+        if not details_table:
+            details_table = soup.find('table', class_='detailsTable')
+        if not details_table:
+            details_table = soup.find('div', class_='productInfo')
         
-        # Also try to find in product details section
-        if author == "-" or publisher == "-":
-            details = soup.find('div', class_='productDetails')
-            if details:
-                rows = details.find_all('tr')
-                for row in rows:
-                    label = row.find('th')
-                    value = row.find('td')
-                    if label and value:
-                        label_text = label.get_text(strip=True)
-                        value_text = value.get_text(strip=True)
-                        
-                        if '著者' in label_text or '作者' in label_text:
-                            if author == "-":
-                                author = value_text
-                        elif '出版社' in label_text:
-                            if publisher == "-":
-                                publisher = value_text
+        if details_table:
+            rows = details_table.find_all('tr')
+            for row in rows:
+                th = row.find('th')
+                td = row.find('td')
+                if th and td:
+                    th_text = th.get_text(strip=True)
+                    td_text = td.get_text(strip=True)
+                    
+                    if '出版社' in th_text or 'Publisher' in th_text:
+                        publisher = td_text
+                        break
+        
+        # Method 2: Look for publisher in spans/divs with specific classes
+        if publisher == "-":
+            for elem in soup.find_all(['span', 'div']):
+                class_name = elem.get('class', [])
+                if isinstance(class_name, list):
+                    class_str = ' '.join(class_name)
+                else:
+                    class_str = str(class_name)
+                
+                if 'publisher' in class_str.lower():
+                    publisher = elem.get_text(strip=True)
+                    break
+        
+        # Method 3: Look for label+value pattern in the page
+        if publisher == "-":
+            all_text = soup.get_text()
+            publisher_match = re.search(r'出版社\s*[：:]\s*([^\n、。]+)', all_text)
+            if publisher_match:
+                publisher = publisher_match.group(1).strip()
+        
+        # Method 4: Search near specific elements
+        if publisher == "-":
+            for text in soup.find_all(string=re.compile('出版社')):
+                parent = text.parent
+                # Try to find the publisher name in the next element
+                next_elem = parent.find_next(['span', 'div', 'a'])
+                if next_elem:
+                    potential_publisher = next_elem.get_text(strip=True)
+                    if potential_publisher and len(potential_publisher) > 1:
+                        publisher = potential_publisher
+                        break
+        
+        # Clean up
+        publisher = re.sub(r'出版社:|出版:|Publisher:|Pub\.|発行:', '', publisher).strip()
         
         return {
             'author': author if author else "-",
