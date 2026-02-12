@@ -1,0 +1,172 @@
+{
+  "updated": "2026-02-12T02:11:56.015350Z",
+  "source": "Nippan Weekly Rankings",
+  "genres": {
+    "General": [],
+    "Paperback": [
+      {
+        "rank": "1up",
+        "last_week": "8",
+        "title": "ほどなく、お別れです",
+        "author": "長月天音",
+        "publisher": "660円",
+        "image": ""
+      },
+      {
+        "rank": "2up",
+        "last_week": "10",
+        "title": "一次元の挿し木",
+        "author": "松下龍之介",
+        "publisher": "818円",
+        "image": ""
+      },
+      {
+        "rank": "3stay",
+        "last_week": "3",
+        "title": "クスノキの番人",
+        "author": "東野圭吾",
+        "publisher": "900円",
+        "image": ""
+      },
+      {
+        "rank": "4down",
+        "last_week": "2",
+        "title": "BUTTER",
+        "author": "柚木麻子",
+        "publisher": "950円",
+        "image": ""
+      },
+      {
+        "rank": "5up",
+        "last_week": "6",
+        "title": "成瀬は天下を取りにいく",
+        "author": "宮島未奈",
+        "publisher": "630円",
+        "image": ""
+      },
+      {
+        "rank": "6up",
+        "last_week": "11",
+        "title": "方舟",
+        "author": "夕木春央",
+        "publisher": "830円",
+        "image": ""
+      },
+      {
+        "rank": "7up",
+        "last_week": "15",
+        "title": "ほどなく、お別れです　遠くの空へ",
+        "author": "長月天音",
+        "publisher": "770円",
+        "image": ""
+      },
+      {
+        "rank": "8new",
+        "last_week": "-",
+        "title": "極意 御庭番斬殺　密命（9）　決定版",
+        "author": "佐伯泰英",
+        "publisher": "950円",
+        "image": ""
+      },
+      {
+        "rank": "9down",
+        "last_week": "5",
+        "title": "プロジェクト・ヘイル・メアリー（上）",
+        "author": "アンディ・ウィアー\n小野田和子",
+        "publisher": "1500円",
+        "image": ""
+      },
+      {
+        "rank": "10new",
+        "last_week": "-",
+        "title": "アナヅラさま",
+        "author": "四島祐之介",
+        "publisher": "727円",
+        "image": ""
+      }
+    ],
+    "Comics": [
+      {
+        "rank": "1new",
+        "last_week": "-",
+        "title": "チェンソーマン（23）",
+        "author": "藤本タツキ",
+        "publisher": "520円",
+        "image": ""
+      },
+      {
+        "rank": "2new",
+        "last_week": "-",
+        "title": "アオのハコ（24）",
+        "author": "三浦糀",
+        "publisher": "520円",
+        "image": ""
+      },
+      {
+        "rank": "3new",
+        "last_week": "-",
+        "title": "BORUTOーTWO BLUE VORTEXー（7）",
+        "author": "池本幹雄\n岸本斉史",
+        "publisher": "520円",
+        "image": ""
+      },
+      {
+        "rank": "4new",
+        "last_week": "-",
+        "title": "極楽街（6）",
+        "author": "佐乃夕斗",
+        "publisher": "520円",
+        "image": ""
+      },
+      {
+        "rank": "5down",
+        "last_week": "1",
+        "title": "キングダム（78）",
+        "author": "原泰久",
+        "publisher": "700円",
+        "image": ""
+      },
+      {
+        "rank": "6new",
+        "last_week": "-",
+        "title": "魔入りました！入間くん（47）",
+        "author": "西修",
+        "publisher": "540円",
+        "image": ""
+      },
+      {
+        "rank": "7new",
+        "last_week": "-",
+        "title": "ファントムバスターズ（7）",
+        "author": "ネオショコ",
+        "publisher": "560円",
+        "image": ""
+      },
+      {
+        "rank": "8up",
+        "last_week": "9",
+        "title": "空母いぶき GREAT GAME（18）",
+        "author": "かわぐちかいじ\n八木勝大ほか",
+        "publisher": "700円",
+        "image": ""
+      },
+      {
+        "rank": "9up",
+        "last_week": "11",
+        "title": "傷モノの花嫁（10）",
+        "author": "友麻碧\n藤丸豆ノ介",
+        "publisher": "720円",
+        "image": ""
+      },
+      {
+        "rank": "10new",
+        "last_week": "-",
+        "title": "死に戻りの魔法学校生活を、元恋人とプロローグから（7）（※ただし好感度はゼロ）",
+        "author": "白川蟻ん\n六つ花えいこほか",
+        "publisher": "760円",
+        "image": ""
+      }
+    ]
+  },
+  "total_genres": 3
+}
