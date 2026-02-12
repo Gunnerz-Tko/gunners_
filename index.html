@@ -321,7 +321,7 @@
 let currentData = null;
 let currentTab = 'General';
 
-const translations = {
+const translations2 = {
     en: {
         title: 'Sakuragawa Japan Book Rankings',
         subtitle: 'Top 20 Weekly Rankings',
@@ -362,7 +362,7 @@ const langBtns = document.querySelectorAll('.lang-btn');
 const tabBtns = document.querySelectorAll('.tab-btn');
 
 function t(key) {
-    return translations[currentLang]?.[key] || translations.en[key];
+    return translations[currentLang]?.[key] || translations2.en[key];
 }
 
 function loadData() {
