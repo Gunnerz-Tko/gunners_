@@ -87,4 +87,3 @@ def main():
     
     categories = {
         "Comics": f
-
