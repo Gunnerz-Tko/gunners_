@@ -6,7 +6,7 @@ import time
 import re
 
 def get_book_info_from_amazon_jp(title):
-    """Scrape book info from Amazon.co.jp (most reliable Japanese source)"""
+    """Scrape book info from Amazon.co.jp with improved parsing"""
     try:
         # Search on Amazon.co.jp
         search_url = f"https://www.amazon.co.jp/s?k={title}&i=books"
@@ -19,26 +19,31 @@ def get_book_info_from_amazon_jp(title):
         response.encoding = 'utf-8'
         
         if response.status_code != 200:
-            print(f"    ⚠️  Amazon.co.jp returned {response.status_code}")
             return None
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Find first book result
-        # Amazon uses multiple possible selectors
-        book_link = soup.find('a', {'data-component-type': 's-search-result'})
-        if not book_link:
-            book_link = soup.find('h2', class_='s-size-mini').find('a')
-        if not book_link:
-            book_link = soup.find('a', class_='a-link-normal')
+        # Find first book result - more reliable selector
+        book_item = soup.find('div', {'data-component-type': 's-search-result'})
+        
+        if not book_item:
+            # Try alternative selector
+            book_item = soup.find('div', class_='s-result-item')
+        
+        if not book_item:
+            return None
+        
+        # Get the link to the book detail page
+        book_link = book_item.find('a', class_='a-link-normal')
         
         if not book_link or not book_link.get('href'):
-            print(f"    ⚠️  No book found on Amazon")
             return None
         
         book_url = book_link['href']
         if not book_url.startswith('http'):
             book_url = 'https://www.amazon.co.jp' + book_url
+        
+        print(f"    📄 Fetching: {book_url}")
         
         # Fetch the book detail page
         response = requests.get(book_url, headers=headers, timeout=10)
@@ -49,62 +54,86 @@ def get_book_info_from_amazon_jp(title):
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Extract author
+        # Extract author from the title area
         author = "-"
-        # Look for author in product details
-        for th in soup.find_all('th'):
-            th_text = th.get_text(strip=True)
-            if '著者' in th_text or '作者' in th_text:
-                td = th.find_next('td')
-                if td:
-                    author = td.get_text(strip=True)
-                    # Clean up
-                    author = re.sub(r'著者:|作者:|作・編集:|,.*', '', author).strip()
+        
+        # Method 1: Look in the product details table (detailBullets or feature-bullets)
+        details_section = soup.find('div', {'data-feature-name': 'detailBullets'})
+        
+        if not details_section:
+            details_section = soup.find('div', {'data-feature-name': 'featurebullets'})
+        
+        if details_section:
+            for li in details_section.find_all('li'):
+                li_text = li.get_text(strip=True)
+                
+                # Look for author
+                if any(x in li_text for x in ['著者', '作者', '著']):
+                    # Extract the author name (usually after the label)
+                    author = re.sub(r'著者[：:]\s*', '', li_text)
+                    author = re.sub(r'作者[：:]\s*', '', author)
+                    # Remove any comma-separated additional info
+                    author = author.split('、')[0].strip()
                     break
         
-        # If not found, try other selectors
+        # Method 2: Look in the attribute table
         if author == "-":
-            author_elem = soup.find(string=re.compile('著者|作者'))
-            if author_elem:
-                parent = author_elem.parent
-                next_elem = parent.find_next(['span', 'div', 'a'])
-                if next_elem:
-                    author = next_elem.get_text(strip=True)
+            table = soup.find('table', {'role': 'presentation'})
+            if not table:
+                table = soup.find('table', class_='a-normal')
+            
+            if table:
+                for tr in table.find_all('tr'):
+                    th = tr.find('th')
+                    td = tr.find('td')
+                    
+                    if th and td:
+                        th_text = th.get_text(strip=True)
+                        
+                        if '著者' in th_text or '作者' in th_text:
+                            author = td.get_text(strip=True)
+                            break
         
         # Extract publisher
         publisher = "-"
-        # Look for publisher in product details
-        for th in soup.find_all('th'):
-            th_text = th.get_text(strip=True)
-            if '出版社' in th_text or 'Publisher' in th_text:
-                td = th.find_next('td')
-                if td:
-                    publisher = td.get_text(strip=True)
-                    publisher = re.sub(r'出版社:|出版:', '', publisher).strip()
+        
+        if details_section:
+            for li in details_section.find_all('li'):
+                li_text = li.get_text(strip=True)
+                
+                # Look for publisher
+                if any(x in li_text for x in ['出版社', 'Publisher', '出版']):
+                    # Extract the publisher name
+                    publisher = re.sub(r'出版社[：:]\s*', '', li_text)
+                    publisher = re.sub(r'Publisher[：:]\s*', '', publisher)
+                    # Remove any additional info after semicolon or comma
+                    publisher = publisher.split('；')[0].split('、')[0].strip()
                     break
         
-        # If not found, try other selectors
+        # Method 2: Look in the attribute table for publisher
         if publisher == "-":
-            publisher_elem = soup.find(string=re.compile('出版社'))
-            if publisher_elem:
-                parent = publisher_elem.parent
-                next_elem = parent.find_next(['span', 'div', 'a'])
-                if next_elem:
-                    publisher = next_elem.get_text(strip=True)
+            table = soup.find('table', {'role': 'presentation'})
+            if not table:
+                table = soup.find('table', class_='a-normal')
+            
+            if table:
+                for tr in table.find_all('tr'):
+                    th = tr.find('th')
+                    td = tr.find('td')
+                    
+                    if th and td:
+                        th_text = th.get_text(strip=True)
+                        
+                        if '出版社' in th_text or 'Publisher' in th_text:
+                            publisher = td.get_text(strip=True)
+                            break
         
-        # Try to find in detail section
-        if publisher == "-":
-            detail_section = soup.find('div', {'data-feature-name': 'detailBullets'})
-            if detail_section:
-                for li in detail_section.find_all('li'):
-                    li_text = li.get_text(strip=True)
-                    if '出版社' in li_text:
-                        publisher = re.sub(r'.*出版社[：:]\s*', '', li_text).strip()
-                        break
+        # Clean up publisher name
+        publisher = re.sub(r'[\(\)（）].*', '', publisher).strip()
         
         return {
-            'author': author if author else "-",
-            'publisher': publisher if publisher else "-",
+            'author': author if author and author != "-" else "-",
+            'publisher': publisher if publisher and publisher != "-" else "-",
             'url': book_url
         }
         
