@@ -5,47 +5,122 @@ from datetime import datetime
 import time
 
 def get_book_info_from_openlibrary(title):
-    """Get author and publisher info from OpenLibrary API"""
+    """Get author and publisher from OpenLibrary"""
     try:
-        url = f"https://openlibrary.org/search.json?title={title}&limit=1"
+        url = f"https://openlibrary.org/search.json?title={title}&limit=5"
         response = requests.get(url, timeout=5)
         
         if response.status_code == 200:
             data = response.json()
             if data.get('docs') and len(data['docs']) > 0:
                 book = data['docs'][0]
-                
-                # Get author
                 authors = book.get('author_name', [])
-                author = authors[0] if authors else "-"
-                
-                # Get publisher
                 publishers = book.get('publisher', [])
-                publisher = publishers[0] if publishers else "-"
                 
-                return author, publisher
-        
-        return "-", "-"
+                return {
+                    'author': authors[0] if authors else "-",
+                    'publisher': publishers[0] if publishers else "-"
+                }
+        return None
     except Exception as e:
-        print(f"⚠️  Error fetching OpenLibrary for '{title}': {e}")
-        return "-", "-"
+        return None
+
+def get_book_info_from_google_books(title):
+    """Get author and publisher from Google Books API"""
+    try:
+        url = f"https://www.googleapis.com/books/v1/volumes?q={title}&maxResults=5"
+        response = requests.get(url, timeout=5)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('items') and len(data['items']) > 0:
+                book = data['items'][0]['volumeInfo']
+                
+                authors = book.get('authors', [])
+                publisher = book.get('publisher', '-')
+                
+                return {
+                    'author': authors[0] if authors else "-",
+                    'publisher': publisher
+                }
+        return None
+    except Exception as e:
+        return None
+
+def get_book_info_from_rakuten(title):
+    """Get author and publisher from Rakuten Books (Japanese source)"""
+    try:
+        # Using Rakuten Books search
+        url = f"https://books.rakuten.co.jp/search/products?keyword={title}"
+        headers = {
+            'User-Agent': 'Mozilla/5.0'
+        }
+        response = requests.get(url, headers=headers, timeout=5)
+        
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Try to find first result
+            result = soup.find('div', class_='item')
+            if result:
+                author_elem = result.find('div', class_='author')
+                publisher_elem = result.find('div', class_='publisher')
+                
+                author = author_elem.get_text(strip=True) if author_elem else "-"
+                publisher = publisher_elem.get_text(strip=True) if publisher_elem else "-"
+                
+                if author != "-" and publisher != "-":
+                    return {
+                        'author': author,
+                        'publisher': publisher
+                    }
+        return None
+    except Exception as e:
+        return None
+
+def get_best_book_info(title):
+    """Try multiple sources in order to get best data"""
+    
+    # Try Rakuten first (Japanese source, most accurate for Japanese books)
+    print(f"  🔍 Checking Rakuten Books...")
+    info = get_book_info_from_rakuten(title)
+    if info and info['author'] != "-" and info['publisher'] != "-":
+        print(f"  ✅ Found on Rakuten!")
+        return info
+    
+    # Try Google Books
+    print(f"  🔍 Checking Google Books...")
+    info = get_book_info_from_google_books(title)
+    if info and info['author'] != "-" and info['publisher'] != "-":
+        print(f"  ✅ Found on Google Books!")
+        return info
+    
+    # Try OpenLibrary
+    print(f"  🔍 Checking OpenLibrary...")
+    info = get_book_info_from_openlibrary(title)
+    if info and info['author'] != "-" and info['publisher'] != "-":
+        print(f"  ✅ Found on OpenLibrary!")
+        return info
+    
+    # Return whatever we have
+    return info or {'author': "-", 'publisher': "-"}
 
 def scrape_nippan_books():
-    """Scrape book titles from Nippan, fetch details from OpenLibrary"""
+    """Scrape titles from Nippan, fetch details from multiple sources"""
     
     try:
         url = "https://www.nippan.co.jp/rank/books/"
         
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         
-        print("🔄 Fetching titles from Nippan...")
+        print("🔄 Fetching titles from Nippan...\n")
         response = requests.get(url, headers=headers, timeout=10)
         response.encoding = 'utf-8'
         
         if response.status_code != 200:
-            print(f"❌ Failed to fetch Nippan (Status: {response.status_code})")
+            print(f"❌ Failed to fetch Nippan")
             return
         
         soup = BeautifulSoup(response.content, 'html.parser')
@@ -59,49 +134,42 @@ def scrape_nippan_books():
             }
         }
         
-        # Find all book rows
-        rows = soup.find_all('tr', class_='book-item')
-        
-        if not rows:
-            rows = soup.find_all('tr')
+        rows = soup.find_all('tr')
         
         general_count = 0
         paperback_count = 0
         comics_count = 0
         
-        for idx, row in enumerate(rows):
+        for row in rows:
             try:
                 cells = row.find_all('td')
                 if len(cells) < 2:
                     continue
                 
-                # Parse rank from Nippan
                 rank_text = cells[0].get_text(strip=True)
                 if not rank_text.isdigit():
                     continue
                 rank = int(rank_text)
                 
-                # Parse title from Nippan
                 title_elem = cells[1].find('a') or cells[1]
                 title = title_elem.get_text(strip=True)
                 
-                # Parse last week from Nippan (if available)
                 last_week = cells[4].get_text(strip=True) if len(cells) > 4 else "-"
                 
-                # Fetch author & publisher from OpenLibrary
-                print(f"🔍 Searching OpenLibrary for: {title}")
-                author, publisher = get_book_info_from_openlibrary(title)
+                print(f"📖 {rank}. {title}")
+                
+                # Get best info from multiple sources
+                book_info = get_best_book_info(title)
                 
                 book_data = {
                     "rank": rank,
                     "last_week": last_week,
                     "title": title,
-                    "author": author,
-                    "publisher": publisher,
+                    "author": book_info['author'],
+                    "publisher": book_info['publisher'],
                     "image": ""
                 }
                 
-                # Distribute to genres
                 if general_count < 10:
                     data["genres"]["General"].append(book_data)
                     general_count += 1
@@ -112,18 +180,14 @@ def scrape_nippan_books():
                     data["genres"]["Comics"].append(book_data)
                     comics_count += 1
                 
-                print(f"✅ {rank}. {title}")
-                print(f"   Author: {author}")
-                print(f"   Publisher: {publisher}\n")
+                print(f"  Author: {book_info['author']}")
+                print(f"  Publisher: {book_info['publisher']}\n")
                 
-                # Be nice to OpenLibrary API
-                time.sleep(0.5)
+                time.sleep(1)  # Be respectful to APIs
                 
             except Exception as e:
-                print(f"⚠️  Error parsing row {idx}: {e}")
                 continue
         
-        # Save to file
         with open('nippan_books.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         
@@ -132,8 +196,6 @@ def scrape_nippan_books():
         print(f"📚 Paperback: {len(data['genres']['Paperback'])} books")
         print(f"📚 Comics: {len(data['genres']['Comics'])} books")
         
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Network error: {e}")
     except Exception as e:
         print(f"❌ Error: {e}")
 
