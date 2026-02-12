@@ -3,110 +3,72 @@ from bs4 import BeautifulSoup
 import json
 from datetime import datetime
 import time
-
-def get_book_info_from_openlibrary(title):
-    """Get author and publisher from OpenLibrary"""
-    try:
-        url = f"https://openlibrary.org/search.json?title={title}&limit=5"
-        response = requests.get(url, timeout=5)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('docs') and len(data['docs']) > 0:
-                book = data['docs'][0]
-                authors = book.get('author_name', [])
-                publishers = book.get('publisher', [])
-                
-                return {
-                    'author': authors[0] if authors else "-",
-                    'publisher': publishers[0] if publishers else "-"
-                }
-        return None
-    except Exception as e:
-        return None
-
-def get_book_info_from_google_books(title):
-    """Get author and publisher from Google Books API"""
-    try:
-        url = f"https://www.googleapis.com/books/v1/volumes?q={title}&maxResults=5"
-        response = requests.get(url, timeout=5)
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('items') and len(data['items']) > 0:
-                book = data['items'][0]['volumeInfo']
-                
-                authors = book.get('authors', [])
-                publisher = book.get('publisher', '-')
-                
-                return {
-                    'author': authors[0] if authors else "-",
-                    'publisher': publisher
-                }
-        return None
-    except Exception as e:
-        return None
+import re
 
 def get_book_info_from_rakuten(title):
-    """Get author and publisher from Rakuten Books (Japanese source)"""
+    """Scrape book info directly from Rakuten Books"""
     try:
-        # Using Rakuten Books search
-        url = f"https://books.rakuten.co.jp/search/products?keyword={title}"
-        headers = {
-            'User-Agent': 'Mozilla/5.0'
-        }
-        response = requests.get(url, headers=headers, timeout=5)
+        # Search on Rakuten Books
+        search_url = f"https://books.rakuten.co.jp/search/products?keyword={title}&sort=-releaseDate"
         
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, 'html.parser')
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+        
+        response = requests.get(search_url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
+        
+        if response.status_code != 200:
+            return None
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # Find first book result
+        book_item = soup.find('div', class_='searchResultItem')
+        
+        if not book_item:
+            book_item = soup.find('li', class_='item')
+        
+        if book_item:
+            # Extract author
+            author_elem = book_item.find('span', class_='author')
+            if not author_elem:
+                author_elem = book_item.find('div', class_='author')
+            if not author_elem:
+                # Try to find author in text
+                author_text = book_item.find_all(string=re.compile('著'))
+                author_elem = author_text[0] if author_text else None
             
-            # Try to find first result
-            result = soup.find('div', class_='item')
-            if result:
-                author_elem = result.find('div', class_='author')
-                publisher_elem = result.find('div', class_='publisher')
-                
-                author = author_elem.get_text(strip=True) if author_elem else "-"
-                publisher = publisher_elem.get_text(strip=True) if publisher_elem else "-"
-                
-                if author != "-" and publisher != "-":
-                    return {
-                        'author': author,
-                        'publisher': publisher
-                    }
+            author = author_elem.get_text(strip=True) if author_elem else "-"
+            
+            # Extract publisher
+            publisher_elem = book_item.find('span', class_='publisher')
+            if not publisher_elem:
+                publisher_elem = book_item.find('div', class_='publisher')
+            if not publisher_elem:
+                # Try to find publisher in text
+                publisher_text = book_item.find_all(string=re.compile('出版社|出版'))
+                publisher_elem = publisher_text[0] if publisher_text else None
+            
+            publisher = publisher_elem.get_text(strip=True) if publisher_elem else "-"
+            
+            # Clean up text
+            author = author.replace('著', '').replace('作', '').replace('編', '').strip()
+            publisher = publisher.replace('出版社:', '').replace('出版:', '').strip()
+            
+            return {
+                'author': author if author else "-",
+                'publisher': publisher if publisher else "-"
+            }
+        
         return None
+        
     except Exception as e:
+        print(f"    ⚠️  Error scraping Rakuten: {e}")
         return None
-
-def get_best_book_info(title):
-    """Try multiple sources in order to get best data"""
-    
-    # Try Rakuten first (Japanese source, most accurate for Japanese books)
-    print(f"  🔍 Checking Rakuten Books...")
-    info = get_book_info_from_rakuten(title)
-    if info and info['author'] != "-" and info['publisher'] != "-":
-        print(f"  ✅ Found on Rakuten!")
-        return info
-    
-    # Try Google Books
-    print(f"  🔍 Checking Google Books...")
-    info = get_book_info_from_google_books(title)
-    if info and info['author'] != "-" and info['publisher'] != "-":
-        print(f"  ✅ Found on Google Books!")
-        return info
-    
-    # Try OpenLibrary
-    print(f"  🔍 Checking OpenLibrary...")
-    info = get_book_info_from_openlibrary(title)
-    if info and info['author'] != "-" and info['publisher'] != "-":
-        print(f"  ✅ Found on OpenLibrary!")
-        return info
-    
-    # Return whatever we have
-    return info or {'author': "-", 'publisher': "-"}
 
 def scrape_nippan_books():
-    """Scrape titles from Nippan, fetch details from multiple sources"""
+    """Scrape titles from Nippan, fetch details from Rakuten Books"""
     
     try:
         url = "https://www.nippan.co.jp/rank/books/"
@@ -157,16 +119,27 @@ def scrape_nippan_books():
                 last_week = cells[4].get_text(strip=True) if len(cells) > 4 else "-"
                 
                 print(f"📖 {rank}. {title}")
+                print(f"   🔍 Searching Rakuten Books...")
                 
-                # Get best info from multiple sources
-                book_info = get_best_book_info(title)
+                # Get info from Rakuten Books
+                book_info = get_book_info_from_rakuten(title)
+                
+                if book_info:
+                    author = book_info['author']
+                    publisher = book_info['publisher']
+                    print(f"   ✅ Author: {author}")
+                    print(f"   ✅ Publisher: {publisher}")
+                else:
+                    author = "-"
+                    publisher = "-"
+                    print(f"   ⚠️  Not found on Rakuten")
                 
                 book_data = {
                     "rank": rank,
                     "last_week": last_week,
                     "title": title,
-                    "author": book_info['author'],
-                    "publisher": book_info['publisher'],
+                    "author": author,
+                    "publisher": publisher,
                     "image": ""
                 }
                 
@@ -180,12 +153,11 @@ def scrape_nippan_books():
                     data["genres"]["Comics"].append(book_data)
                     comics_count += 1
                 
-                print(f"  Author: {book_info['author']}")
-                print(f"  Publisher: {book_info['publisher']}\n")
-                
-                time.sleep(1)  # Be respectful to APIs
+                print()
+                time.sleep(2)  # Be respectful to Rakuten servers
                 
             except Exception as e:
+                print(f"   ❌ Error: {e}\n")
                 continue
         
         with open('nippan_books.json', 'w', encoding='utf-8') as f:
