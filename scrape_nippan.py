@@ -62,26 +62,28 @@ def scrape_nippan_books():
         comics_count = 0
         
         for row in rows:
-            try:
-                cells = row.find_all('td')
-                if len(cells) < 2:
-                    continue
-                
-                rank_text = cells[0].get_text(strip=True)
-                if not rank_text.isdigit():
-                    continue
-                rank = int(rank_text)
-                
-                # Get title
-                title_link = cells[1].find('a')
-                if not title_link:
-                    continue
-                
-                title = title_link.get_text(strip=True)
-                
-                last_week = cells[4].get_text(strip=True) if len(cells) > 4 else "-"
-                
-                print(f"📖 {rank}. {title}")
+    try:
+        cells = row.find_all('td')
+        if len(cells) < 2:
+            continue
+        
+        rank_text = cells[0].get_text(strip=True)
+        if not rank_text.isdigit():
+            continue
+        rank = int(rank_text)
+        
+        # Get title
+        title_link = cells[1].find('a')
+        if not title_link:
+            continue
+        
+        title = title_link.get_text(strip=True)
+        
+        # SKIP the price column (cells[2] is 価格)
+        # Get last_week from cells[3] instead of cells[4]
+        last_week = cells[3].get_text(strip=True) if len(cells) > 3 else "-"
+        
+        print(f"📖 {rank}. {title}")
                 
                 # Try to find correction for this title
                 correction = find_correction(title, corrections)
