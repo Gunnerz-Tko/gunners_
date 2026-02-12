@@ -1,137 +1,219 @@
-import asyncio
-from playwright.async_api import async_playwright
+import requests
+from bs4 import BeautifulSoup
 import json
 from datetime import datetime
-from bs4 import BeautifulSoup
+import difflib
+import time
 
-async def scrape_nippan_category(browser, category_url, category_name):
-    """Scrape Nippan ranking data using Playwright"""
+ORICON_URLS = {
+    "Comics": "https://www.oricon.co.jp/rank/obc/w/2026-02-16/",
+    "Paperback": "https://www.oricon.co.jp/rank/obb/w/2026-02-16/",
+    "Light Novel": "https://www.oricon.co.jp/rank/obl/w/2026-02-16/",
+    "Light Literature": "https://www.oricon.co.jp/rank/obll/w/2026-02-16/",
+    "Literary": "https://www.oricon.co.jp/rank/oba/w/2026-02-16/"
+}
+
+def load_corrections():
+    """Load corrections from books_corrections.json"""
     try:
-        page = await browser.new_page()
-        await page.goto(category_url, wait_until='networkidle', timeout=30000)
+        with open('books_corrections.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('corrections', {})
+    except Exception as e:
+        print(f"⚠️  Could not load corrections: {e}")
+        return {}
+
+def find_correction(title, corrections_by_genre):
+    """Find correction for a title with fuzzy matching"""
+    
+    title_normalized = ' '.join(title.split())
+    
+    for genre, books in corrections_by_genre.items():
+        for book in books:
+            book_title = ' '.join(book['title'].split())
+            
+            if title_normalized.lower() == book_title.lower():
+                return book
+            
+            similarity = difflib.SequenceMatcher(None, title_normalized.lower(), book_title.lower()).ratio()
+            if similarity > 0.85:
+                return book
+    
+    return None
+
+def scrape_oricon(url, genre):
+    """Scrape Oricon ranking page"""
+    
+    print(f"\n🔄 Scraping {genre} from Oricon...")
+    
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
         
-        # Wait for the ranking table to load
-        await page.wait_for_selector('table', timeout=10000)
+        if response.status_code != 200:
+            print(f"❌ Failed to fetch {genre}: {response.status_code}")
+            return []
         
-        # Get the page content after JavaScript loads
-        content = await page.content()
-        soup = BeautifulSoup(content, 'html.parser')
+        soup = BeautifulSoup(response.content, 'html.parser')
         
         books = []
         
-        # Find all rows in the ranking table
-        rows = soup.select('table tbody tr')
-        print(f"Found {len(rows)} rows in {category_name}")
+        # Find ranking items - Oricon structure
+        # Look for rows in the ranking table
+        ranking_rows = soup.find_all('tr', class_='js-ranking-item')
         
-        for idx, row in enumerate(rows[:20], 1):  # Top 20
+        if not ranking_rows:
+            ranking_rows = soup.find_all('tr', {'data-rank': True})
+        
+        if not ranking_rows:
+            # Fallback: look for divs with ranking data
+            ranking_rows = soup.find_all('div', class_='ranking-item')
+        
+        print(f"   📊 Found {len(ranking_rows)} items")
+        
+        for idx, item in enumerate(ranking_rows[:10], 1):  # Top 10
             try:
-                cells = row.find_all('td')
-                if len(cells) < 5:
-                    print(f"  Row {idx}: Not enough cells ({len(cells)})")
+                # Extract rank
+                rank = idx
+                rank_elem = item.find('span', class_='rank-no')
+                if rank_elem:
+                    try:
+                        rank = int(rank_elem.get_text(strip=True))
+                    except:
+                        rank = idx
+                
+                # Extract title
+                title_elem = item.find('a', class_='title')
+                if not title_elem:
+                    title_elem = item.find('span', class_='title')
+                if not title_elem:
+                    title_elem = item.find('p', class_='title')
+                
+                if not title_elem:
                     continue
                 
-                # Rank (This week) - usually in first cell
-                rank_text = cells[0].text.strip()
-                rank = rank_text.split('\n')[0] if rank_text else str(idx)
-                # Clean up rank (remove 'up', 'down', 'new', 'stay')
-                rank = ''.join(c for c in rank if c.isdigit())
+                title = title_elem.get_text(strip=True)
                 
-                # Last Week - usually in second cell
-                last_week_text = cells[1].text.strip()
-                # Extract just the number and position indicator
-                last_week = last_week_text.split('\n')[0] if last_week_text else "-"
+                # Extract author
+                author_elem = item.find('span', class_='artist')
+                if not author_elem:
+                    author_elem = item.find('a', class_='artist')
+                if not author_elem:
+                    author_elem = item.find('p', class_='artist')
+                if not author_elem:
+                    author_elem = item.find('td', {'data-column': 'artist'})
                 
-                # Image
-                img_elem = row.find('img')
-                image = img_elem.get('src', '') if img_elem else ""
-                if image and not image.startswith('http'):
-                    if image.startswith('//'):
-                        image = 'https:' + image
-                    else:
-                        image = 'https://www.nippan.co.jp' + image
+                author = author_elem.get_text(strip=True) if author_elem else "-"
                 
-                # Book Title - usually in 3rd or 4th cell
-                title = "Unknown"
-                title_elem = cells[2].find('a') or cells[3].find('a') if len(cells) > 3 else None
-                if title_elem:
-                    title = title_elem.text.strip()
-                else:
-                    title = cells[2].text.strip() if len(cells) > 2 else "Unknown"
+                # Extract publisher
+                publisher_elem = item.find('span', class_='publisher')
+                if not publisher_elem:
+                    publisher_elem = item.find('p', class_='publisher')
+                if not publisher_elem:
+                    publisher_elem = item.find('td', class_='publisher')
+                if not publisher_elem:
+                    publisher_elem = item.find('td', {'data-column': 'publisher'})
                 
-                # Author - usually in 4th or 5th cell
-                author = "Unknown"
-                if len(cells) > 4:
-                    author_text = cells[4].text.strip()
-                    # Sometimes includes newlines, take first line
-                    author = author_text.split('\n')[0] if author_text else "Unknown"
-                elif len(cells) > 3:
-                    author_text = cells[3].text.strip()
-                    author = author_text.split('\n')[0] if author_text else "Unknown"
+                publisher = publisher_elem.get_text(strip=True) if publisher_elem else "-"
                 
-                # Publisher - usually in 5th or 6th cell
-                publisher = "Unknown"
-                if len(cells) > 5:
-                    publisher_text = cells[5].text.strip()
-                    publisher = publisher_text.split('\n')[0] if publisher_text else "Unknown"
+                # Extract sales
+                sales_elem = item.find('span', class_='sales-count')
+                if not sales_elem:
+                    sales_elem = item.find('p', class_='sales')
+                if not sales_elem:
+                    sales_elem = item.find('td', class_='sales')
+                if not sales_elem:
+                    sales_elem = item.find('td', {'data-column': 'sales'})
                 
-                if title != "Unknown" and rank:
-                    book = {
-                        "rank": rank,
-                        "last_week": last_week,
-                        "title": title,
-                        "author": author,
-                        "publisher": publisher,
-                        "image": image
-                    }
-                    books.append(book)
-                    print(f"  #{rank}: {title} - {author}")
+                sales = sales_elem.get_text(strip=True) if sales_elem else "-"
+                
+                print(f"   {rank}. {title}")
+                print(f"      Auteur: {author}")
+                print(f"      Éditeur: {publisher}")
+                print(f"      Ventes: {sales}")
+                
+                books.append({
+                    "rank": rank,
+                    "title": title,
+                    "author": author,
+                    "publisher": publisher,
+                    "sales": sales
+                })
                 
             except Exception as e:
-                print(f"Error parsing row {idx}: {e}")
+                print(f"   ⚠️  Error parsing item: {e}")
                 continue
         
-        await page.close()
         return books
         
     except Exception as e:
-        print(f"Error scraping {category_url}: {e}")
+        print(f"❌ Error scraping {genre}: {e}")
+        import traceback
+        traceback.print_exc()
         return []
 
-async def main():
-    print(f"Scraping Nippan ranking data...\n")
+def scrape_all_oricon():
+    """Scrape all Oricon categories"""
     
-    categories = {
-        "General": "https://www.nippan.co.jp/ranking/weekly/?ranking_cat=83",
-        "Paperback": "https://www.nippan.co.jp/ranking/weekly/?ranking_cat=84",
-        "Comics": "https://www.nippan.co.jp/ranking/weekly/?ranking_cat=85"
-    }
+    print("📚 Starting Oricon Rankings Scraper...\n")
     
+    # Load corrections
+    corrections = load_corrections()
+    print(f"📋 Loaded corrections: {len(corrections)} genres\n")
+    
+    # Data structure
     data = {
         "updated": datetime.now().isoformat() + "Z",
-        "source": "Nippan Weekly Rankings",
-        "genres": {},
-        "total_genres": len(categories)
+        "source": "oricon.co.jp",
+        "genres": {
+            "Comics": [],
+            "Paperback": [],
+            "Light Novel": [],
+            "Light Literature": [],
+            "Literary": []
+        }
     }
     
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
+    # Scrape each category
+    for genre, url in ORICON_URLS.items():
+        books = scrape_oricon(url, genre)
         
-        for category_name, url in categories.items():
-            print(f"\n{'='*60}")
-            print(f"Scraping {category_name}...")
-            print(f"URL: {url}")
-            print('='*60)
-            books = await scrape_nippan_category(browser, url, category_name)
-            data["genres"][category_name] = books
-            print(f"✓ Found {len(books)} books in {category_name}")
+        print(f"\n🔍 Applying corrections for {genre}...")
         
-        await browser.close()
+        # Apply corrections
+        for book in books:
+            correction = find_correction(book['title'], corrections)
+            
+            if correction:
+                book['author'] = correction.get('author', book['author'])
+                book['publisher'] = correction.get('publisher', book['publisher'])
+                print(f"   ✅ Correction applied: {book['title']}")
+            else:
+                print(f"   ℹ️  No correction: {book['title']}")
+        
+        data["genres"][genre] = books
+        
+        print(f"✅ {genre}: {len(books)} books scraped\n")
+        
+        time.sleep(2)  # Be respectful to server
     
-    # Save to JSON file
-    with open('nippan_books.json', 'w', encoding='utf-8') as f:
+    # Save to file
+    with open('oricon_books.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print("\n✅ Data saved to nippan_books.json")
+    print(f"\n" + "="*50)
+    print(f"✅ Scraping completed!")
+    print(f"="*50)
+    print(f"📚 Comics: {len(data['genres']['Comics'])} books")
+    print(f"📚 Paperback: {len(data['genres']['Paperback'])} books")
+    print(f"📚 Light Novel: {len(data['genres']['Light Novel'])} books")
+    print(f"📚 Light Literature: {len(data['genres']['Light Literature'])} books")
+    print(f"📚 Literary: {len(data['genres']['Literary'])} books")
+    print(f"💾 Saved to: oricon_books.json")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    scrape_all_oricon()
