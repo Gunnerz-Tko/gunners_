@@ -1,1 +1,62 @@
-<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Book Sales Data</title>\n</head>\n<body>\n    <h1>Book Sales Data</h1>\n    <h2>Source : Oricon</h2>\n    <table>\n        <thead>\n            <tr>\n                <th>Book Title</th>\n                <th>Estimated Sales</th>\n            </tr>\n        </thead>\n        <tbody id="book-list">\n            <!-- Data will be inserted here -->\n        </tbody>\n    </table>\n    <script>\n        fetch('oricon_books.json')\n            .then(response => response.json())\n            .then(data => {\n                const bookList = document.getElementById('book-list');\n                data.forEach(book => {\n                    const row = document.createElement('tr');\n                    row.innerHTML = `\n                        <td>${book.title}</td>\n                        <td>${book.estimated_sales}</td>\n                    `;\n                    bookList.appendChild(row);\n                });\n            })\n            .catch(error => console.error('Error fetching data:', error));\n    </script>\n</body>\n</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oricon Books</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <button onclick="setLanguage('en')">EN</button>
+        <button onclick="setLanguage('ja')">JA</button>
+        <button onclick="setLanguage('fr')">FR</button>
+    </header>
+
+    <div class="tabs">
+        <button onclick="openTab('comics')">Comics</button>
+        <button onclick="openTab('paperback')">Paperback</button>
+        <button onclick="openTab('lightNovel')">Light Novel</button>
+        <button onclick="openTab('lightLiterature')">Light Literature</button>
+        <button onclick="openTab('literary')">Literary</button>
+    </div>
+
+    <table id="booksTable">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Estimated Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dynamic content will be loaded here -->
+        </tbody>
+    </table>
+
+    <footer>
+        <a href="https://cyrilcarrere.org" target="_blank">cyrilcarrere.org</a>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        // JavaScript functionality for switching tabs and rendering data
+        let language = 'en';
+
+        function setLanguage(lang) {
+            language = lang;
+            // Logic to update the content based on language
+        }
+
+        function openTab(tabName) {
+            // Logic to switch between tabs
+        }
+
+        fetch('oricon_books.json')
+            .then(response => response.json())
+            .then(data => {
+                // Logic to render data into the table
+            });
+    </script>
+</body>
+</html>
