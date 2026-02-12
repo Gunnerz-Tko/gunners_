@@ -1,169 +1,330 @@
 {
-  "updated": "2026-02-12T02:24:42.828604Z",
+  "updated": "2026-02-12T02:32:44.700418Z",
   "source": "Nippan Weekly Rankings",
   "genres": {
-    "General": [],
+    "General": [
+      {
+        "rank": "1",
+        "last_week": "-",
+        "title": "アイドル経営者",
+        "author": "大倉忠義",
+        "publisher": "1800円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "2",
+        "last_week": "-",
+        "title": "2026 J1＆J2＆J3百年構想リーグ選手名鑑",
+        "author": "Unknown",
+        "publisher": "1182円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "3",
+        "last_week": "-",
+        "title": "乃木坂46 梅澤美波2nd写真集　透明な覚悟",
+        "author": "CLASSY.編集部",
+        "publisher": "2545円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "4",
+        "last_week": "3",
+        "title": "ハーバード、スタンフォード、オックスフォード…　科学的に証明された　すごい習慣大百科",
+        "author": "堀田秀吾",
+        "publisher": "1600円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "5",
+        "last_week": "2",
+        "title": "カフェーの帰り道",
+        "author": "嶋津輝",
+        "publisher": "1700円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "6",
+        "last_week": "6",
+        "title": "",
+        "author": "Unknown",
+        "publisher": "726円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "7",
+        "last_week": "-",
+        "title": "ドラゴンクエストVII　Reimagined GUIDEBOOK to NEW WORLD",
+        "author": "Vジャンプ編集部",
+        "publisher": "1800円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "8",
+        "last_week": "-",
+        "title": "2026 J1＆J2＆J3百年構想リーグ選手名鑑 ハンディ版",
+        "author": "Unknown",
+        "publisher": "891円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "9",
+        "last_week": "1",
+        "title": "",
+        "author": "Unknown",
+        "publisher": "899円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "10",
+        "last_week": "10",
+        "title": "TOEIC L＆R TEST 出る単特急 金のフレーズ 　増補改訂版",
+        "author": "TEX加藤",
+        "publisher": "900円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "11",
+        "last_week": "9",
+        "title": "変な地図",
+        "author": "雨穴",
+        "publisher": "1600円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "12",
+        "last_week": "8",
+        "title": "ジャングル&Co.",
+        "author": "Unknown",
+        "publisher": "499円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "13",
+        "last_week": "29",
+        "title": "イン・ザ・メガチャーチ",
+        "author": "朝井リョウ",
+        "publisher": "2000円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "14",
+        "last_week": "11",
+        "title": "成瀬は都を駆け抜ける",
+        "author": "宮島未奈",
+        "publisher": "1700円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "15",
+        "last_week": "15",
+        "title": "やりたいことが見つかる 世界の果てのカフェ",
+        "author": "ジョン・ストレルキー",
+        "publisher": "1600円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "16",
+        "last_week": "7",
+        "title": "3か月でマスターする 人体　2026年2月号",
+        "author": "柳田素子",
+        "publisher": "1300円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "17",
+        "last_week": "5",
+        "title": "生きとるわ",
+        "author": "又吉直樹",
+        "publisher": "2000円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "18",
+        "last_week": "-",
+        "title": "おかあさんの扉（15）",
+        "author": "伊藤理佐",
+        "publisher": "945円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "19",
+        "last_week": "-",
+        "title": "CHEER　Vol.66",
+        "author": "Unknown",
+        "publisher": "1073円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      },
+      {
+        "rank": "20",
+        "last_week": "-",
+        "title": "もっと解きたい！漢字堂特選100問　Vol.13",
+        "author": "Unknown",
+        "publisher": "682円",
+        "image": "https://www.nippan.co.jp/wp-content/themes/nippan.co.jp/img/common/img_pixel01.png"
+      }
+    ],
     "Paperback": [
       {
-        "rank": "1up",
+        "rank": "1",
         "last_week": "8",
         "title": "ほどなく、お別れです",
-        "author": "長月天音",
-        "publisher": "660円",
+        "author": "660円",
+        "publisher": "小学館",
         "image": ""
       },
       {
-        "rank": "2up",
+        "rank": "2",
         "last_week": "10",
         "title": "一次元の挿し木",
-        "author": "松下龍之介",
-        "publisher": "818円",
+        "author": "818円",
+        "publisher": "宝島社",
         "image": ""
       },
       {
-        "rank": "3stay",
+        "rank": "3",
         "last_week": "3",
         "title": "クスノキの番人",
-        "author": "東野圭吾",
-        "publisher": "900円",
+        "author": "900円",
+        "publisher": "実業之日本社",
         "image": ""
       },
       {
-        "rank": "4down",
+        "rank": "4",
         "last_week": "2",
         "title": "BUTTER",
-        "author": "柚木麻子",
-        "publisher": "950円",
+        "author": "950円",
+        "publisher": "新潮社",
         "image": ""
       },
       {
-        "rank": "5up",
+        "rank": "5",
         "last_week": "6",
         "title": "成瀬は天下を取りにいく",
-        "author": "宮島未奈",
-        "publisher": "630円",
+        "author": "630円",
+        "publisher": "新潮社",
         "image": ""
       },
       {
-        "rank": "6up",
+        "rank": "6",
         "last_week": "11",
         "title": "方舟",
-        "author": "夕木春央",
-        "publisher": "830円",
+        "author": "830円",
+        "publisher": "講談社",
         "image": ""
       },
       {
-        "rank": "7up",
+        "rank": "7",
         "last_week": "15",
         "title": "ほどなく、お別れです　遠くの空へ",
-        "author": "長月天音",
-        "publisher": "770円",
+        "author": "770円",
+        "publisher": "小学館",
         "image": ""
       },
       {
-        "rank": "8new",
+        "rank": "8",
         "last_week": "-",
         "title": "極意 御庭番斬殺　密命（9）　決定版",
-        "author": "佐伯泰英",
-        "publisher": "950円",
+        "author": "950円",
+        "publisher": "文藝春秋",
         "image": ""
       },
       {
-        "rank": "9down",
+        "rank": "9",
         "last_week": "5",
         "title": "プロジェクト・ヘイル・メアリー（上）",
-        "author": "アンディ・ウィアー\n小野田和子",
-        "publisher": "1500円",
+        "author": "1500円",
+        "publisher": "早川書房",
         "image": ""
       },
       {
-        "rank": "10new",
+        "rank": "10",
         "last_week": "-",
         "title": "アナヅラさま",
-        "author": "四島祐之介",
-        "publisher": "727円",
+        "author": "727円",
+        "publisher": "宝島社",
         "image": ""
       }
     ],
     "Comics": [
       {
-        "rank": "1new",
+        "rank": "1",
         "last_week": "-",
         "title": "チェンソーマン（23）",
-        "author": "藤本タツキ",
-        "publisher": "520円",
+        "author": "520円",
+        "publisher": "集英社",
         "image": ""
       },
       {
-        "rank": "2new",
+        "rank": "2",
         "last_week": "-",
         "title": "アオのハコ（24）",
-        "author": "三浦糀",
-        "publisher": "520円",
+        "author": "520円",
+        "publisher": "集英社",
         "image": ""
       },
       {
-        "rank": "3new",
+        "rank": "3",
         "last_week": "-",
         "title": "BORUTOーTWO BLUE VORTEXー（7）",
-        "author": "池本幹雄\n岸本斉史",
-        "publisher": "520円",
+        "author": "520円",
+        "publisher": "集英社",
         "image": ""
       },
       {
-        "rank": "4new",
+        "rank": "4",
         "last_week": "-",
         "title": "極楽街（6）",
-        "author": "佐乃夕斗",
-        "publisher": "520円",
+        "author": "520円",
+        "publisher": "集英社",
         "image": ""
       },
       {
-        "rank": "5down",
+        "rank": "5",
         "last_week": "1",
         "title": "キングダム（78）",
-        "author": "原泰久",
-        "publisher": "700円",
+        "author": "700円",
+        "publisher": "集英社",
         "image": ""
       },
       {
-        "rank": "6new",
+        "rank": "6",
         "last_week": "-",
         "title": "魔入りました！入間くん（47）",
-        "author": "西修",
-        "publisher": "540円",
+        "author": "540円",
+        "publisher": "秋田書店",
         "image": ""
       },
       {
-        "rank": "7new",
+        "rank": "7",
         "last_week": "-",
         "title": "ファントムバスターズ（7）",
-        "author": "ネオショコ",
-        "publisher": "560円",
+        "author": "560円",
+        "publisher": "集英社",
         "image": ""
       },
       {
-        "rank": "8up",
+        "rank": "8",
         "last_week": "9",
         "title": "空母いぶき GREAT GAME（18）",
-        "author": "かわぐちかいじ\n八木勝大ほか",
-        "publisher": "700円",
+        "author": "700円",
+        "publisher": "小学館",
         "image": ""
       },
       {
-        "rank": "9up",
+        "rank": "9",
         "last_week": "11",
         "title": "傷モノの花嫁（10）",
-        "author": "友麻碧\n藤丸豆ノ介",
-        "publisher": "720円",
+        "author": "720円",
+        "publisher": "講談社",
         "image": ""
       },
       {
-        "rank": "10new",
+        "rank": "10",
         "last_week": "-",
         "title": "死に戻りの魔法学校生活を、元恋人とプロローグから（7）（※ただし好感度はゼロ）",
-        "author": "白川蟻ん\n六つ花えいこほか",
-        "publisher": "760円",
+        "author": "760円",
+        "publisher": "KADOKAWA",
         "image": ""
       }
     ]
