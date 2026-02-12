@@ -172,21 +172,21 @@
             en: {
                 title: 'Sakuragawa Japan Book Sales Report',
                 subtitle: 'Top 10 Rankings by Genre',
-                source: 'Source : Oricon',
+                source: 'Source : Nippan',
                 refresh: '🔄 Refresh',
                 loading: 'Loading...'
             },
             ja: {
                 title: '桜川日本書籍売上レポート',
                 subtitle: 'ジャンル別トップ10ランキング',
-                source: 'ソース：オリコン',
+                source: 'ソース：日本書籍販売',
                 refresh: '🔄 更新',
                 loading: '読み込み中...'
             },
             fr: {
                 title: 'Rapport de Ventes de Livres Sakuragawa Japon',
                 subtitle: 'Classement Top 10 par Genre',
-                source: 'Source : Oricon',
+                source: 'Source : Nippan',
                 refresh: '🔄 Actualiser',
                 loading: 'Chargement...'
             }
@@ -208,7 +208,7 @@
         function refreshData() {
             document.getElementById('weekInfo').textContent = translations[currentLanguage].loading;
             
-            fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/oricon_books.json?t=' + Date.now())
+            fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/nippan_books.json?t=' + Date.now())
                 .then(r => r.json())
                 .then(data => {
                     console.log('Data loaded:', data);
