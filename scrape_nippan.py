@@ -5,17 +5,39 @@ from datetime import datetime
 import time
 import re
 
-def get_book_info_from_rakuten(title):
-    """Scrape book info directly from Rakuten Books"""
+def get_book_info_from_honyaclub(title, nippan_link):
+    """Scrape book info from honyaclub.com (the actual source)"""
     try:
-        # Search on Rakuten Books
-        search_url = f"https://books.rakuten.co.jp/search/products?keyword={title}&sort=-releaseDate"
+        # If we have the direct link from Nippan, use it
+        if nippan_link and 'honyaclub' in nippan_link:
+            url = nippan_link
+        else:
+            # Otherwise search on honyaclub
+            search_url = f"https://www.honyaclub.com/search/?q={title}"
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+            response = requests.get(search_url, headers=headers, timeout=10)
+            response.encoding = 'utf-8'
+            
+            if response.status_code != 200:
+                return None
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            first_result = soup.find('a', class_='searchResultItemLink')
+            
+            if not first_result or not first_result.get('href'):
+                return None
+            
+            url = first_result['href']
+            if not url.startswith('http'):
+                url = 'https://www.honyaclub.com' + url
         
+        # Fetch the book page
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-        
-        response = requests.get(search_url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=10)
         response.encoding = 'utf-8'
         
         if response.status_code != 200:
@@ -23,52 +45,69 @@ def get_book_info_from_rakuten(title):
         
         soup = BeautifulSoup(response.content, 'html.parser')
         
-        # Find first book result
-        book_item = soup.find('div', class_='searchResultItem')
+        # Extract author
+        author = "-"
+        # Try multiple selectors for author
+        author_elem = soup.find('div', class_='author')
+        if not author_elem:
+            author_elem = soup.find('span', class_='author')
+        if not author_elem:
+            # Look for 著者 (author) text
+            author_elem = soup.find(string=re.compile('著者|作者'))
+            if author_elem:
+                author_elem = author_elem.find_next('span')
         
-        if not book_item:
-            book_item = soup.find('li', class_='item')
+        if author_elem:
+            author = author_elem.get_text(strip=True)
+            author = re.sub(r'著者:|著|作|編|訳', '', author).strip()
         
-        if book_item:
-            # Extract author
-            author_elem = book_item.find('span', class_='author')
-            if not author_elem:
-                author_elem = book_item.find('div', class_='author')
-            if not author_elem:
-                # Try to find author in text
-                author_text = book_item.find_all(string=re.compile('著'))
-                author_elem = author_text[0] if author_text else None
-            
-            author = author_elem.get_text(strip=True) if author_elem else "-"
-            
-            # Extract publisher
-            publisher_elem = book_item.find('span', class_='publisher')
-            if not publisher_elem:
-                publisher_elem = book_item.find('div', class_='publisher')
-            if not publisher_elem:
-                # Try to find publisher in text
-                publisher_text = book_item.find_all(string=re.compile('出版社|出版'))
-                publisher_elem = publisher_text[0] if publisher_text else None
-            
-            publisher = publisher_elem.get_text(strip=True) if publisher_elem else "-"
-            
-            # Clean up text
-            author = author.replace('著', '').replace('作', '').replace('編', '').strip()
-            publisher = publisher.replace('出版社:', '').replace('出版:', '').strip()
-            
-            return {
-                'author': author if author else "-",
-                'publisher': publisher if publisher else "-"
-            }
+        # Extract publisher
+        publisher = "-"
+        # Try multiple selectors for publisher
+        publisher_elem = soup.find('div', class_='publisher')
+        if not publisher_elem:
+            publisher_elem = soup.find('span', class_='publisher')
+        if not publisher_elem:
+            # Look for 出版社 (publisher) text
+            publisher_elem = soup.find(string=re.compile('出版社|出版'))
+            if publisher_elem:
+                publisher_elem = publisher_elem.find_next('span')
         
-        return None
+        if publisher_elem:
+            publisher = publisher_elem.get_text(strip=True)
+            publisher = re.sub(r'出版社:|出版:', '', publisher).strip()
+        
+        # Also try to find in product details section
+        if author == "-" or publisher == "-":
+            details = soup.find('div', class_='productDetails')
+            if details:
+                rows = details.find_all('tr')
+                for row in rows:
+                    label = row.find('th')
+                    value = row.find('td')
+                    if label and value:
+                        label_text = label.get_text(strip=True)
+                        value_text = value.get_text(strip=True)
+                        
+                        if '著者' in label_text or '作者' in label_text:
+                            if author == "-":
+                                author = value_text
+                        elif '出版社' in label_text:
+                            if publisher == "-":
+                                publisher = value_text
+        
+        return {
+            'author': author if author else "-",
+            'publisher': publisher if publisher else "-",
+            'url': url
+        }
         
     except Exception as e:
-        print(f"    ⚠️  Error scraping Rakuten: {e}")
+        print(f"    ⚠️  Error scraping honyaclub: {e}")
         return None
 
 def scrape_nippan_books():
-    """Scrape titles from Nippan, fetch details from Rakuten Books"""
+    """Scrape from Nippan, get details from honyaclub links"""
     
     try:
         url = "https://www.nippan.co.jp/rank/books/"
@@ -113,16 +152,24 @@ def scrape_nippan_books():
                     continue
                 rank = int(rank_text)
                 
-                title_elem = cells[1].find('a') or cells[1]
-                title = title_elem.get_text(strip=True)
+                # Get title and link from Nippan
+                title_link = cells[1].find('a')
+                if not title_link:
+                    continue
+                
+                title = title_link.get_text(strip=True)
+                nippan_link = title_link.get('href', '')
+                if not nippan_link.startswith('http'):
+                    nippan_link = 'https://www.nippan.co.jp' + nippan_link
                 
                 last_week = cells[4].get_text(strip=True) if len(cells) > 4 else "-"
                 
                 print(f"📖 {rank}. {title}")
-                print(f"   🔍 Searching Rakuten Books...")
+                print(f"   🔗 Link: {nippan_link}")
+                print(f"   🔍 Fetching from honyaclub...")
                 
-                # Get info from Rakuten Books
-                book_info = get_book_info_from_rakuten(title)
+                # Get info from honyaclub
+                book_info = get_book_info_from_honyaclub(title, nippan_link)
                 
                 if book_info:
                     author = book_info['author']
@@ -132,7 +179,7 @@ def scrape_nippan_books():
                 else:
                     author = "-"
                     publisher = "-"
-                    print(f"   ⚠️  Not found on Rakuten")
+                    print(f"   ⚠️  Could not fetch from honyaclub")
                 
                 book_data = {
                     "rank": rank,
@@ -154,7 +201,7 @@ def scrape_nippan_books():
                     comics_count += 1
                 
                 print()
-                time.sleep(2)  # Be respectful to Rakuten servers
+                time.sleep(2)  # Be respectful to servers
                 
             except Exception as e:
                 print(f"   ❌ Error: {e}\n")
