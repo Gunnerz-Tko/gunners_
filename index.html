@@ -172,10 +172,10 @@
         }
     <footer>
         <p>© 2026 Oricon Books Dashboard | Auto-updated daily</p>
-    </footer>
+        </footer>
 
     <script>
-                        let currentLanguage = 'en';
+        let currentLanguage = 'en';
 
         const translations = {
             en: {
@@ -183,33 +183,21 @@
                 subtitle: 'Top 10 Rankings by Genre',
                 source: 'Source : Oricon',
                 refresh: '🔄 Refresh',
-                loading: 'Loading...',
-                all: 'All',
-                fiction: 'Fiction',
-                manga: 'Manga',
-                comics: 'Comics'
+                loading: 'Loading...'
             },
             ja: {
                 title: '桜川日本書籍売上レポート',
                 subtitle: 'ジャンル別トップ10ランキング',
                 source: 'ソース：オリコン',
                 refresh: '🔄 更新',
-                loading: '読み込み中...',
-                all: 'すべて',
-                fiction: 'フィクション',
-                manga: 'マンガ',
-                comics: 'コミック'
+                loading: '読み込み中...'
             },
             fr: {
                 title: 'Rapport de Ventes de Livres Sakuragawa Japon',
                 subtitle: 'Classement Top 10 par Genre',
                 source: 'Source : Oricon',
                 refresh: '🔄 Actualiser',
-                loading: 'Chargement...',
-                all: 'Tous',
-                fiction: 'Fiction',
-                manga: 'Manga',
-                comics: 'Comics'
+                loading: 'Chargement...'
             }
         };
 
@@ -218,35 +206,17 @@
             document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Update header text
             document.querySelector('header h1').textContent = translations[lang].title;
             document.querySelectorAll('header p')[0].textContent = translations[lang].subtitle;
             document.querySelectorAll('header p')[1].textContent = translations[lang].source;
-            
-            // Update button
             document.querySelector('.refresh-btn').textContent = translations[lang].refresh;
             
-            // Refresh data
             refreshData();
         }
-        function setLanguage(lang) {
-            currentLanguage = lang;
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Refresh with new language
-            refreshData();
-        }        function refreshData() {
+
+        function refreshData() {
             document.getElementById('weekInfo').textContent = translations[currentLanguage].loading;
             
-            fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/oricon_books.json?t=' + Date.now())
-                .then(r => r.json())
-                .then(data => {
-                    console.log('Data loaded:', data);
-                    displayDashboard(data);
-                })
-                .catch(e => console.error('Error:', e));
-        } {
             fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/oricon_books.json?t=' + Date.now())
                 .then(r => r.json())
                 .then(data => {
@@ -278,7 +248,15 @@
                 contentContainer.appendChild(content);
             });
 
-            const updateDate = new Date(data.updated); const formattedDate = updateDate.toLocaleDateString('en-US', {      year: 'numeric',      month: 'long',      day: 'numeric',     hour: '2-digit',     minute: '2-digit' }); document.getElementById('weekInfo').innerHTML = `     <strong>Week 7, 2026</strong> | Last updated: ${formattedDate} `;
+            const updateDate = new Date(data.updated);
+            const formattedDate = updateDate.toLocaleDateString(currentLanguage === 'ja' ? 'ja-JP' : currentLanguage === 'fr' ? 'fr-FR' : 'en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('weekInfo').innerHTML = `<strong>Week 7, 2026</strong> | Last updated: ${formattedDate}`;
         }
 
         function renderBooks(books) {
