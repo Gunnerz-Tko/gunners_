@@ -1,133 +1,194 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sakuragawa Japan Book Rankings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root {
-            --primary: #6366f1;
-            --secondary: #ec4899;
-            --bg-dark: #0f172a;
-            --text-dark: #1e293b;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--bg-dark) 0%, #1e3a8a 100%);
-            min-height: 100vh;
-            color: var(--text-dark);
-        }
-        header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
-        }
-        header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-        }
-        header .subtitle { font-size: 1.1em; opacity: 0.95; margin-bottom: 15px; }
-        header .source-text { font-size: 0.9em; opacity: 0.9; }
-        .controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-        .lang-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .lang-btn {
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-        }
-        .lang-btn:hover { background: rgba(255, 255, 255, 0.3); }
-        .lang-btn.active { background: rgba(255, 255, 255, 0.5); border-color: white; }
-        .refresh-btn {
-            padding: 10px 25px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0.95em;
-        }
-        .refresh-btn:hover { background: rgba(255, 255, 255, 0.3); }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
-        }
-        .info-bar {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px 30px;
-            border-radius: 15px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        .tabs-container {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            padding-bottom: 20px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-        }
-        .tab-btn {
-            padding: 12px 25px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            cursor: pointer;
-            font-weight: 600;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-        .tab-btn:hover { background: rgba(255, 255, 255, 0.15); }
-        .tab-btn.active {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-color: transparent;
-        }
-        #content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        table thead {
-            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
-            color: white;
-        }
-        table th {
-            padding: 15px;
-            text-align: left;
-            font-weight: 700;
-            border-right: 1px solid rgba(255,255,255,0.2);
-        }
-        table th:last-child {*
+
+refreshData();
+</script>
+    <script>
+let currentData = null;
+let currentTab = 'General';
+
+const translations = {
+    en: {
+        title: 'Sakuragawa Japan Book Rankings',
+        subtitle: 'Top 20 Weekly Rankings',
+        source: 'Source : Nippan',
+        refresh: '🔄 Refresh',
+        loading: 'Loading...',
+        general: 'General',
+        paperback: 'Paperback',
+        comics: 'Comics'
+    },
+    ja: {
+        title: '桜川日本書籍ランキング',
+        subtitle: '週間トップ20ランキング',
+        source: 'ソース：日本書籍販売',
+        refresh: '🔄 更新',
+        loading: '読み込み中...',
+        general: '一般',
+        paperback: '文庫本',
+        comics: 'コミックス'
+    },
+    fr: {
+        title: 'Classements de Livres Sakuragawa Japon',
+        subtitle: 'Classements Top 20 Hebdomadaires',
+        source: 'Source : Nippan',
+        refresh: '🔄 Actualiser',
+        loading: 'Chargement...',
+        general: 'Général',
+        paperback: 'Poche',
+        comics: 'Comics'
+    }
+};
+
+let currentLang = 'en';
+
+const contentDiv = document.getElementById('content');
+const refreshBtn = document.getElementById('refreshBtn');
+const langBtns = document.querySelectorAll('.lang-btn');
+const tabBtns = document.querySelectorAll('.tab-btn');
+
+function t(key) {
+    return translations[currentLang]?.[key] || translations.en[key];
 }
+
+function loadData() {
+    contentDiv.innerHTML = `<p style="text-align: center; color: #999; padding: 40px;">${t('loading')}</p>`;
+    
+    const jsonUrl = 'https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/nippan_books.json?t=' + Date.now();
+    console.log('Fetching from:', jsonUrl);
+    
+    fetch(jsonUrl)
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Data loaded:', data);
+            if (!data.genres) {
+                throw new Error('No genres found in data');
+            }
+            currentData = data;
+            renderTab(currentTab);
+        })
+        .catch(error => {
+            console.error('Error loading data:', error);
+            contentDiv.innerHTML = `<p style="text-align: center; color: #e74c3c; padding: 40px;">❌ Error loading data: ${error.message}<br><br>Check the console (F12) for more details.</p>`;
+        });
+}
+
+function renderBooks(books) {
+    if (!books || books.length === 0) {
+        return '<p style="text-align: center; color: #999; padding: 40px;">No data available</p>';
+    }
+    
+    let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">';
+    
+    // Table header
+    html += '<thead style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); color: white;">';
+    html += '<tr>';
+    html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2); min-width: 70px;">Rank</th>';
+    html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2); min-width: 100px;">Last Week</th>';
+    html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2); min-width: 100px;">Cover</th>';
+    html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2); min-width: 250px;">Title</th>';
+    html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2); min-width: 200px;">Author</th>';
+    html += '<th style="padding: 15px; text-align: left; font-weight: 700; min-width: 200px;">Publisher</th>';
+    html += '</tr>';
+    html += '</thead>';
+    
+    // Table body
+    html += '<tbody>';
+    books.forEach((book, index) => {
+        const bgColor = index % 2 === 0 ? 'rgba(99, 102, 241, 0.05)' : 'white';
+        html += `<tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">`;
+        
+        // Rank
+        html += `<td style="padding: 15px; text-align: center; font-weight: 700; color: #6366f1; font-size: 1.1em;">${book.rank || '-'}</td>`;
+        
+        // Last Week
+        html += `<td style="padding: 15px; text-align: center; color: #64748b;">${book.last_week || '-'}</td>`;
+        
+        // Cover Image
+        if (book.image) {
+            html += `<td style="padding: 15px; text-align: center;"><img src="${book.image}" alt="${book.title}" style="height: 80px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.style.background='#f0f4f8'; this.style.height='80px'; this.style.width='60px';"></td>`;
+        } else {
+            html += `<td style="padding: 15px; text-align: center; background: #f0f4f8; height: 80px; border-radius: 8px;">-</td>`;
+        }
+        
+        // Title
+        html += `<td style="padding: 15px; text-align: left; font-weight: 600; color: #1e293b;">${book.title || '-'}</td>`;
+        
+        // Author
+        html += `<td style="padding: 15px; text-align: left; color: #64748b;">${book.author || '-'}</td>`;
+        
+        // Publisher
+        html += `<td style="padding: 15px; text-align: left; color: #64748b; font-size: 0.9em;">${book.publisher || '-'}</td>`;
+        
+        html += '</tr>';
+    });
+    html += '</tbody>';
+    html += '</table></div>';
+    
+    return html;
+}
+
+function renderTab(tabName) {
+    currentTab = tabName;
+    
+    // Update active tab button
+    tabBtns.forEach(btn => {
+        btn.style.borderBottom = btn.getAttribute('data-tab') === tabName ? '3px solid #6366f1' : 'none';
+        btn.style.color = btn.getAttribute('data-tab') === tabName ? '#6366f1' : '#64748b';
+    });
+    
+    // Render books
+    if (currentData && currentData.genres[tabName]) {
+        contentDiv.innerHTML = renderBooks(currentData.genres[tabName]);
+    } else {
+        contentDiv.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">No data available for this category</p>';
+    }
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    
+    // Update active language button
+    langBtns.forEach(btn => {
+        btn.style.opacity = btn.getAttribute('data-lang') === lang ? '1' : '0.6';
+        btn.style.fontWeight = btn.getAttribute('data-lang') === lang ? 'bold' : 'normal';
+    });
+    
+    // Update page text
+    document.querySelector('h1').textContent = t('title');
+    document.querySelector('.subtitle').textContent = t('subtitle');
+    document.querySelector('.source-text').textContent = t('source');
+    refreshBtn.textContent = t('refresh');
+    
+    // Update tab names
+    tabBtns.forEach(btn => {
+        const tabName = btn.getAttribute('data-tab');
+        btn.textContent = t(tabName.toLowerCase());
+    });
+}
+
+// Event listeners
+refreshBtn.addEventListener('click', loadData);
+
+langBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        setLanguage(btn.getAttribute('data-lang'));
+    });
+});
+
+tabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        renderTab(btn.getAttribute('data-tab'));
+    });
+});
+
+// Load data on page load
+loadData();
+setLanguage('en');
+</script>
+</body>
+</html>
