@@ -26,16 +26,20 @@ async def scrape_nippan_category(browser, category_url, category_name):
         for idx, row in enumerate(rows[:20], 1):  # Top 20
             try:
                 cells = row.find_all('td')
-                if len(cells) < 6:
+                if len(cells) < 5:
+                    print(f"  Row {idx}: Not enough cells ({len(cells)})")
                     continue
                 
-                # Rank (This week)
-                rank_elem = cells[0]
-                rank = rank_elem.text.strip() if rank_elem else str(idx)
+                # Rank (This week) - usually in first cell
+                rank_text = cells[0].text.strip()
+                rank = rank_text.split('\n')[0] if rank_text else str(idx)
+                # Clean up rank (remove 'up', 'down', 'new', 'stay')
+                rank = ''.join(c for c in rank if c.isdigit())
                 
-                # Last Week
-                last_week_elem = cells[1]
-                last_week = last_week_elem.text.strip() if last_week_elem else "-"
+                # Last Week - usually in second cell
+                last_week_text = cells[1].text.strip()
+                # Extract just the number and position indicator
+                last_week = last_week_text.split('\n')[0] if last_week_text else "-"
                 
                 # Image
                 img_elem = row.find('img')
@@ -46,19 +50,31 @@ async def scrape_nippan_category(browser, category_url, category_name):
                     else:
                         image = 'https://www.nippan.co.jp' + image
                 
-                # Book Title
-                title_elem = cells[2].find('a')
-                title = title_elem.text.strip() if title_elem else "Unknown"
+                # Book Title - usually in 3rd or 4th cell
+                title = "Unknown"
+                title_elem = cells[2].find('a') or cells[3].find('a') if len(cells) > 3 else None
+                if title_elem:
+                    title = title_elem.text.strip()
+                else:
+                    title = cells[2].text.strip() if len(cells) > 2 else "Unknown"
                 
-                # Author
-                author_elem = cells[3]
-                author = author_elem.text.strip() if author_elem else "Unknown"
+                # Author - usually in 4th or 5th cell
+                author = "Unknown"
+                if len(cells) > 4:
+                    author_text = cells[4].text.strip()
+                    # Sometimes includes newlines, take first line
+                    author = author_text.split('\n')[0] if author_text else "Unknown"
+                elif len(cells) > 3:
+                    author_text = cells[3].text.strip()
+                    author = author_text.split('\n')[0] if author_text else "Unknown"
                 
-                # Publisher
-                publisher_elem = cells[4]
-                publisher = publisher_elem.text.strip() if publisher_elem else "Unknown"
+                # Publisher - usually in 5th or 6th cell
+                publisher = "Unknown"
+                if len(cells) > 5:
+                    publisher_text = cells[5].text.strip()
+                    publisher = publisher_text.split('\n')[0] if publisher_text else "Unknown"
                 
-                if title != "Unknown":
+                if title != "Unknown" and rank:
                     book = {
                         "rank": rank,
                         "last_week": last_week,
