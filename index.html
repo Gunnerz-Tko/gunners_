@@ -262,7 +262,6 @@
         html += '<tr>';
         html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Rank</th>';
         html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Last Week</th>';
-        html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Cover</th>';
         html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Title</th>';
         html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Author</th>';
         html += '<th style="padding: 15px; text-align: left; font-weight: 700;">Publisher</th>';
@@ -280,13 +279,6 @@
             
             // Last Week
             html += `<td style="padding: 15px; text-align: center; color: #64748b;">${book.last_week || '-'}</td>`;
-            
-            // Cover Image
-            if (book.image) {
-                html += `<td style="padding: 15px; text-align: center;"><img src="${book.image}" alt="${book.title.replace(/"/g, '&quot;')}" style="height: 80px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></td>`;
-            } else {
-                html += '<td style="padding: 15px; text-align: center;">-</td>';
-            }
             
             // Title
             html += `<td style="padding: 15px; text-align: left; font-weight: 600; color: #1e293b;">${(book.title || '-').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
