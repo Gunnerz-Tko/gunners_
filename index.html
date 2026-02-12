@@ -250,7 +250,7 @@
         document.getElementById('weekInfo').innerHTML = `<strong>Week 7, 2026</strong> | Last updated: ${formattedDate}`;
     }
 
-    function renderBooks(books) {
+        function renderBooks(books) {
         if (!books || books.length === 0) {
             return '<p style="text-align: center; color: #999; padding: 40px;">No data available</p>';
         }
@@ -262,7 +262,6 @@
         html += '<tr>';
         html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Rank</th>';
         html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Last Week</th>';
-                html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Last Week</th>';
         html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Cover</th>';
         html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Title</th>';
         html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Author</th>';
@@ -304,6 +303,7 @@
         html += '</table></div>';
         
         return html;
+    }
     }
 
     function switchTab(genre) {
