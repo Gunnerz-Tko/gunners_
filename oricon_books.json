@@ -1,15 +1,99 @@
 {
-  "updated": "2026-02-11T15:32:00.985190Z",
+  "updated": "2026-02-12T10:30:00.985190Z",
   "week": "Week 7 2026",
   "genres": {
-    "Fiction": [
+    "General": [
       {
         "rank": 1,
-        "title": "Book Title",
-        "author": "Author Name",
-        "sales": "150000",
-        "image": "https://..."
+        "title": "The Midnight Library",
+        "author": "Matt Haig",
+        "sales": "245000",
+        "image": "https://covers.openlibrary.org/b/id/8415671-M.jpg"
+      },
+      {
+        "rank": 2,
+        "title": "Project Hail Mary",
+        "author": "Andy Weir",
+        "sales": "198000",
+        "image": "https://covers.openlibrary.org/b/id/8424261-M.jpg"
+      },
+      {
+        "rank": 3,
+        "title": "Lessons in Chemistry",
+        "author": "Bonnie Garmus",
+        "sales": "176000",
+        "image": "https://covers.openlibrary.org/b/id/9285375-M.jpg"
+      }
+    ],
+    "Literature": [
+      {
+        "rank": 1,
+        "title": "Norwegian Wood",
+        "author": "Haruki Murakami",
+        "sales": "320000",
+        "image": "https://covers.openlibrary.org/b/id/7897865-M.jpg"
+      },
+      {
+        "rank": 2,
+        "title": "The Tale of Genji",
+        "author": "Murasaki Shikibu",
+        "sales": "285000",
+        "image": "https://covers.openlibrary.org/b/id/2547064-M.jpg"
+      },
+      {
+        "rank": 3,
+        "title": "Kafka on the Shore",
+        "author": "Haruki Murakami",
+        "sales": "267000",
+        "image": "https://covers.openlibrary.org/b/id/8051197-M.jpg"
+      }
+    ],
+    "Light Novels": [
+      {
+        "rank": 1,
+        "title": "That Time I Got Reincarnated as a Spider",
+        "author": "Okina Baba",
+        "sales": "450000",
+        "image": "https://covers.openlibrary.org/b/id/9876543-M.jpg"
+      },
+      {
+        "rank": 2,
+        "title": "Sword Art Online",
+        "author": "Reki Kawahara",
+        "sales": "425000",
+        "image": "https://covers.openlibrary.org/b/id/8765432-M.jpg"
+      },
+      {
+        "rank": 3,
+        "title": "Re:Zero Starting Life in Another World",
+        "author": "Tappei Nagatsuki",
+        "sales": "395000",
+        "image": "https://covers.openlibrary.org/b/id/7654321-M.jpg"
+      }
+    ],
+    "Comics": [
+      {
+        "rank": 1,
+        "title": "One Piece Vol. 105",
+        "author": "Eiichiro Oda",
+        "sales": "580000",
+        "image": "https://covers.openlibrary.org/b/id/9123456-M.jpg"
+      },
+      {
+        "rank": 2,
+        "title": "Attack on Titan Vol. 34",
+        "author": "Hajime Isayama",
+        "sales": "520000",
+        "image": "https://covers.openlibrary.org/b/id/8234567-M.jpg"
+      },
+      {
+        "rank": 3,
+        "title": "My Hero Academia Vol. 37",
+        "author": "Kohei Horikoshi",
+        "sales": "485000",
+        "image": "https://covers.openlibrary.org/b/id/7345678-M.jpg"
       }
     ]
-  }
+  },
+  "total_genres": 4
 }
