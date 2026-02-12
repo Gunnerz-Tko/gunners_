@@ -1,7 +1,8 @@
-import requests
-from bs4 import BeautifulSoup
+import asyncio
+from playwright.async_api import async_playwright
 import json
 from datetime import datetime, timedelta
+from bs4 import BeautifulSoup
 
 def get_week_date():
     """Get the date for the current week (Monday of current week)"""
@@ -9,111 +10,76 @@ def get_week_date():
     monday = today - timedelta(days=today.weekday())
     return monday.strftime('%Y-%m-%d')
 
-def scrape_oricon_category(category_url):
-    """Scrape Oricon data for a specific category"""
+async def scrape_oricon_category(browser, category_url):
+    """Scrape Oricon data using Playwright to load JavaScript"""
     try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-        response = requests.get(category_url, headers=headers, timeout=15)
-        response.encoding = 'utf-8'
+        page = await browser.new_page()
+        await page.goto(category_url, wait_until='networkidle', timeout=30000)
         
-        if response.status_code != 200:
-            print(f"Error fetching {category_url}: {response.status_code}")
-            return []
+        # Wait for the ranking table to load
+        await page.wait_for_selector('tr.rank_item', timeout=10000)
         
-        soup = BeautifulSoup(response.content, 'html.parser')
+        # Get the page content after JavaScript loads
+        content = await page.content()
+        soup = BeautifulSoup(content, 'html.parser')
+        
         books = []
-        
-        # Try multiple selectors for rank items
         rank_items = soup.select('tr.rank_item')
-        if not rank_items:
-            rank_items = soup.select('table tr[class*="rank"]')
-        if not rank_items:
-            rank_items = soup.select('tbody tr')
-            
-        print(f"Found {len(rank_items)} potential rank items")
-        
-        # Debug: Print first item HTML
-        if rank_items:
-            print("\nFirst item HTML:")
-            print(rank_items[0].prettify()[:500])
+        print(f"Found {len(rank_items)} rank items")
         
         for idx, item in enumerate(rank_items[:10], 1):
             try:
-                # Try different selectors for rank
-                rank = str(idx)
-                for rank_selector in ['td:nth-child(1)', '.rank_num', 'td[class*="rank"]']:
-                    rank_elem = item.select_one(rank_selector)
-                    if rank_elem:
-                        rank = rank_elem.text.strip().replace('位', '').strip()
-                        break
+                # Rank
+                rank_elem = item.select_one('td.rank_num')
+                rank = rank_elem.text.strip() if rank_elem else str(idx)
+                rank = rank.replace('位', '').strip()
                 
                 # Book cover image
-                image = ""
-                for img_selector in ['img', 'img[alt]', 'td:nth-child(2) img']:
-                    img_elem = item.select_one(img_selector)
-                    if img_elem:
-                        image = img_elem.get('src', '')
-                        if image and not image.startswith('http'):
-                            image = 'https://www.oricon.co.jp' + image
-                        break
+                img_elem = item.select_one('img')
+                image = img_elem.get('src', '') if img_elem else ""
+                if image and not image.startswith('http'):
+                    image = 'https://www.oricon.co.jp' + image
                 
-                # Book Title - try multiple selectors
-                title = "Unknown"
-                for title_selector in ['.title a', 'td:nth-child(3) a', 'td:nth-child(4) a', 'a[href*="/product/"]']:
-                    title_elem = item.select_one(title_selector)
-                    if title_elem:
-                        title = title_elem.text.strip()
-                        break
+                # Book Title
+                title_elem = item.select_one('td.title a')
+                title = title_elem.text.strip() if title_elem else "Unknown"
                 
                 # Publisher
-                publisher = "Unknown"
-                for pub_selector in ['.publisher', 'td:nth-child(5)', 'td:nth-child(6)']:
-                    pub_elem = item.select_one(pub_selector)
-                    if pub_elem:
-                        publisher = pub_elem.text.strip()
-                        break
+                publisher_elem = item.select_one('td.publisher')
+                publisher = publisher_elem.text.strip() if publisher_elem else "Unknown"
                 
                 # Release Date
-                release_date = "Unknown"
-                for date_selector in ['.release_date', 'td:nth-child(6)', 'td:nth-child(7)']:
-                    date_elem = item.select_one(date_selector)
-                    if date_elem:
-                        release_date = date_elem.text.strip()
-                        break
+                release_date_elem = item.select_one('td.release_date')
+                release_date = release_date_elem.text.strip() if release_date_elem else "Unknown"
                 
                 # Estimated Sales
-                sales = "0"
-                for sales_selector in ['.sales', 'td:nth-child(7)', 'td:nth-child(8)']:
-                    sales_elem = item.select_one(sales_selector)
-                    if sales_elem:
-                        sales = sales_elem.text.strip()
-                        sales = sales.replace(',', '').replace('万', '0000').split()[0]
-                        break
+                sales_elem = item.select_one('td.sales')
+                sales = sales_elem.text.strip() if sales_elem else "0"
+                sales = sales.replace(',', '').replace('万', '0000').split()[0] if sales else "0"
                 
-                if title != "Unknown":  # Only add if we found a title
-                    book = {
-                        "rank": rank,
-                        "title": title,
-                        "publisher": publisher,
-                        "release_date": release_date,
-                        "sales": sales,
-                        "image": image
-                    }
-                    books.append(book)
-                    print(f"✓ #{rank}: {title}")
+                book = {
+                    "rank": rank,
+                    "title": title,
+                    "publisher": publisher,
+                    "release_date": release_date,
+                    "sales": sales,
+                    "image": image
+                }
+                books.append(book)
+                print(f"  #{rank}: {title}")
                 
             except Exception as e:
-                print(f"Error parsing book entry {idx}: {e}")
+                print(f"Error parsing item {idx}: {e}")
                 continue
         
+        await page.close()
         return books
+        
     except Exception as e:
         print(f"Error scraping {category_url}: {e}")
         return []
 
-def main():
+async def main():
     week_date = get_week_date()
     print(f"Scraping Oricon data for week of {week_date}...\n")
     
@@ -131,14 +97,16 @@ def main():
         "total_genres": len(categories)
     }
     
-    for category_name, url in categories.items():
-        print(f"\n{'='*60}")
-        print(f"Scraping {category_name}...")
-        print(f"URL: {url}")
-        print('='*60)
-        books = scrape_oricon_category(url)
-        data["genres"][category_name] = books
-        print(f"✓ Found {len(books)} books in {category_name}")
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        
+        for category_name, url in categories.items():
+            print(f"\nScraping {category_name}...")
+            books = await scrape_oricon_category(browser, url)
+            data["genres"][category_name] = books
+            print(f"✓ Found {len(books)} books")
+        
+        await browser.close()
     
     # Save to JSON file
     with open('oricon_books.json', 'w', encoding='utf-8') as f:
@@ -147,4 +115,4 @@ def main():
     print("\n✅ Data saved to oricon_books.json")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
