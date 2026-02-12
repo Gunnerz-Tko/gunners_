@@ -4,12 +4,12 @@
       {"title": "アイドル経営者", "author": "大倉忠義", "publisher": "講談社"},
       {"title": "2026 J1＆J2＆J3百年構想リーグ選手名鑑", "author": "NSK Mook", "publisher": "日本スポーツ企画出版社"},
       {"title": "乃木坂46 梅澤美波2nd写真集　透明な覚悟", "author": "CLASSY.編集部", "publisher": "光文社"},
-      {"title": "ハーバード、スタンフォード、オックスフォード…科学的に証明されたすごい習慣大百科", "author": "堀田秀吾", "publisher": "SBクリエイティブ"},
+      {"title": "ハーバード、スタンフォード、オックスフォード…　科学的に証明された　すごい習慣大百科", "author": "堀田秀吾", "publisher": "SBクリエイティブ"},
       {"title": "カフェーの帰り道", "author": "嶋津輝", "publisher": "東京創元社"},
-      {"title": "のび～る！ 最強リアル海のいきもの大集結BOOK サメ＆シャチ スペシャル!", "author": "-", "publisher": "宝島社"},
+      {"title": "-", "author": "-", "publisher": "-"},
       {"title": "ドラゴンクエストVII　Reimagined GUIDEBOOK to NEW WORLD", "author": "Vジャンプ編集部", "publisher": "集英社"},
       {"title": "2026 J1＆J2＆J3百年構想リーグ選手名鑑 ハンディ版", "author": "NSK Mook", "publisher": "日本スポーツ企画出版社"},
-      {"title": "ハローキティ ふわふわファーチャームBOOK", "author": "-", "publisher": "宝島社"},
+      {"title": "-", "author": "-", "publisher": "-"},
       {"title": "TOEIC L＆R TEST 出る単特急 金のフレーズ 　増補改訂版", "author": "TEX加藤", "publisher": "朝日新聞出版"}
     ],
     "Paperback": [
@@ -17,12 +17,12 @@
       {"title": "ジャングル&Co.", "author": "-", "publisher": "デアゴスティーニ・ジャパン"},
       {"title": "イン・ザ・メガチャーチ", "author": "朝井リョウ", "publisher": "日経BP"},
       {"title": "成瀬は都を駆け抜ける", "author": "宮島未奈", "publisher": "新潮社"},
-      {"title": "やりたいことが見つかる 世界の果てのカフェ", "author": "ジョン・ストレルキー/鹿田昌美", "publisher": "ダイヤモンド社"},
-      {"title": "3か月でマスターする 人体　2026年2月号", "author": "柳田素子/竹田潔ほか", "publisher": "NHK出版"},
+      {"title": "やりたいことが見つかる 世界の果てのカフェ", "author": "ジョン・ストレルキー", "publisher": "ダイヤモンド社"},
+      {"title": "3か月でマスターする 人体　2026年2月号", "author": "柳田素子", "publisher": "NHK出版"},
       {"title": "生きとるわ", "author": "又吉直樹", "publisher": "文藝春秋"},
       {"title": "おかあさんの扉（15）", "author": "伊藤理佐", "publisher": "オレンジページ"},
       {"title": "CHEER　Vol.66", "author": "-", "publisher": "宝島社"},
-      {"title": "もっと解きたい！漢字堂特選100問　Vol.13", "author": "Mook", "publisher": "マガジン・マガジン"}
+      {"title": "もっと解きたい！漢字堂特選100問　Vol.13", "author": "-", "publisher": "マガジン・マガジン"}
     ],
     "Comics": []
   }
