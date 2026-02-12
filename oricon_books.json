@@ -2,10 +2,14 @@
   "updated": "2026-02-11T15:32:00.985190Z",
   "week": "Week 7 2026",
   "genres": {
-    "General": [],
-    "Literature": [],
-    "Light Novels": [],
-    "Comics": []
-  },
-  "total_genres": 4
+    "Fiction": [
+      {
+        "rank": 1,
+        "title": "Book Title",
+        "author": "Author Name",
+        "sales": "150000",
+        "image": "https://..."
+      }
+    ]
+  }
 }
