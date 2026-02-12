@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sakuragawa Japan Book Sales Report</title>
+    <title>Sakuragawa Japan Book Rankings</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
             --primary: #6366f1;
             --secondary: #ec4899;
-            --accent: #f59e0b;
             --bg-dark: #0f172a;
             --text-dark: #1e293b;
             --text-light: #64748b;
@@ -28,23 +27,26 @@
             padding: 40px 20px;
             text-align: center;
             box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header > div:first-child {
-            flex: 1;
-            text-align: center;
         }
         header h1 {
             font-family: 'Playfair Display', serif;
-            font-size: 3.5em;
+            font-size: 3em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 8px rgba(0,0,0,0.2);
         }
-        .language-buttons {
+        header .subtitle { font-size: 1.1em; opacity: 0.95; margin-bottom: 15px; }
+        header .source-text { font-size: 0.9em; opacity: 0.9; }
+        .controls {
             display: flex;
-            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .lang-buttons {
+            display: flex;
+            gap: 8px;
         }
         .lang-btn {
             padding: 8px 15px;
@@ -57,43 +59,36 @@
             transition: all 0.3s ease;
             font-size: 0.9em;
         }
-        .lang-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+        .lang-btn:hover { background: rgba(255, 255, 255, 0.3); }
+        .lang-btn.active { background: rgba(255, 255, 255, 0.5); border-color: white; }
+        .refresh-btn {
+            padding: 10px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
         }
-        .lang-btn.active {
-            background: rgba(255, 255, 255, 0.5);
-            border-color: white;
-        }
+        .refresh-btn:hover { background: rgba(255, 255, 255, 0.3); }
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 40px 20px;
         }
         .info-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             background: rgba(255, 255, 255, 0.95);
             padding: 20px 30px;
             border-radius: 15px;
             margin-bottom: 40px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
-        .refresh-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .refresh-btn:hover { transform: translateY(-2px); }
         .tabs-container {
             display: flex;
-            gap: 10px;
-            margin-bottom: 40px;
+            gap: 15px;
+            margin-bottom: 30px;
             flex-wrap: wrap;
             padding-bottom: 20px;
             border-bottom: 2px solid rgba(255, 255, 255, 0.1);
@@ -108,212 +103,31 @@
             border-radius: 10px;
             transition: all 0.3s ease;
         }
+        .tab-btn:hover { background: rgba(255, 255, 255, 0.15); }
         .tab-btn.active {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             border-color: transparent;
         }
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-        }
-        .book-card {
+        #content {
             background: white;
+            padding: 30px;
             border-radius: 15px;
-            overflow: hidden;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
         }
-        .book-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2); }
-        .book-image { width: 100%; height: 280px; object-fit: cover; background: #f0f4f8; }
-        .book-info { padding: 20px; }
-        .book-title { font-weight: 700; font-size: 1.05em; margin-bottom: 8px; }
-        .book-author { color: var(--text-light); font-size: 0.9em; margin-bottom: 12px; }
-        .book-sales { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-        .sales-value { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; font-size: 1.3em; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        footer { text-align: center; padding: 30px 20px; color: rgba(255, 255, 255, 0.6); margin-top: 60px; }
-    </style>
-</head>
-<body>
-    <header>
-        <div>
-            <h1>Sakuragawa Japan Book Sales Report</h1>
-            <p>Top 10 Rankings by Genre</p>
-            <p style="font-size: 0.9em; opacity: 0.9; margin-top: 10px;">Source : Nippan</p>
-        </div>
-        <div class="language-buttons">
-            <button class="lang-btn active" onclick="setLanguage('en')">EN</button>
-            <button class="lang-btn" onclick="setLanguage('ja')">日本語</button>
-            <button class="lang-btn" onclick="setLanguage('fr')">FR</button>
-        </div>
-    </header>
-
-    <div class="container">
-        <div class="info-bar">
-            <div class="week-info"><span id="weekInfo">Loading...</span></div>
-            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
-        </div>
-
-        <div id="tabsContainer" class="tabs-container"></div>
-        <div id="contentContainer"></div>
-    </div>
-
-    <footer>
-        <p>© 2026 Sakuragawa Japan Book Sales Report, by Cyril Carrère, Literary Scout</p>
-        <p><a href="https://www.cyrilcarrere.org" target="_blank" style="color: #6366f1; text-decoration: none; font-weight: 600;">www.cyrilcarrere.org</a></p>
-    </footer>
-
-    <script>
-        let currentLanguage = 'en';
-
-        const translations = {
-            en: {
-                title: 'Sakuragawa Japan Book Sales Report',
-                subtitle: 'Top 10 Rankings by Genre',
-                source: 'Source : Nippan',
-                refresh: '🔄 Refresh',
-                loading: 'Loading...'
-            },
-            ja: {
-                title: '桜川日本書籍売上レポート',
-                subtitle: 'ジャンル別トップ10ランキング',
-                source: 'ソース：日本書籍販売',
-                refresh: '🔄 更新',
-                loading: '読み込み中...'
-            },
-            fr: {
-                title: 'Rapport de Ventes de Livres Sakuragawa Japon',
-                subtitle: 'Classement Top 10 par Genre',
-                source: 'Source : Nippan',
-                refresh: '🔄 Actualiser',
-                loading: 'Chargement...'
-            }
-        };
-
-        function setLanguage(lang) {
-            currentLanguage = lang;
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            document.querySelector('header h1').textContent = translations[lang].title;
-            document.querySelectorAll('header p')[0].textContent = translations[lang].subtitle;
-            document.querySelectorAll('header p')[1].textContent = translations[lang].source;
-            document.querySelector('.refresh-btn').textContent = translations[lang].refresh;
-            
-            refreshData();
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
         }
-
-        function refreshData() {
-            document.getElementById('weekInfo').textContent = translations[currentLanguage].loading;
-            
-            fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/nippan_books.json?t=' + Date.now())
-                .then(r => r.json())
-                .then(data => {
-                    console.log('Data loaded:', data);
-                    displayDashboard(data);
-                })
-                .catch(e => console.error('Error:', e));
+        table thead {
+            background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            color: white;
         }
-
-        function displayDashboard(data) {
-            const genres = Object.keys(data.genres || {});
-            const tabsContainer = document.getElementById('tabsContainer');
-            const contentContainer = document.getElementById('contentContainer');
-            
-            tabsContainer.innerHTML = '';
-            contentContainer.innerHTML = '';
-
-            genres.forEach((genre, index) => {
-                const btn = document.createElement('button');
-                btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
-                btn.textContent = genre;
-                btn.onclick = () => switchTab(genre);
-                tabsContainer.appendChild(btn);
-
-                const content = document.createElement('div');
-                content.className = `tab-content ${index === 0 ? 'active' : ''}`;
-                content.id = `tab-${genre}`;
-                content.innerHTML = renderBooks(data.genres[genre]);
-                contentContainer.appendChild(content);
-            });
-
-            const updateDate = new Date(data.updated);
-            const formattedDate = updateDate.toLocaleDateString(currentLanguage === 'ja' ? 'ja-JP' : currentLanguage === 'fr' ? 'fr-FR' : 'en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-            document.getElementById('weekInfo').innerHTML = `<strong>Week 7, 2026</strong> | Last updated: ${formattedDate}`;
+        table th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 700;
+            border-right: 1px solid rgba(255,255,255,0.2);
         }
-
-       function renderBooks(books) {
-    if (!books || books.length === 0) {
-        return '<p style="text-align: center; color: #999; padding: 40px;">No data available</p>';
-    }
-    
-    let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">';
-    
-    // Table header
-    html += '<thead style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); color: white;">';
-    html += '<tr>';
-    html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Rank</th>';
-    html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Last Week</th>';
-    html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Cover</th>';
-    html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Title</th>';
-    html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Author</th>';
-    html += '<th style="padding: 15px; text-align: left; font-weight: 700;">Publisher</th>';
-    html += '</tr>';
-    html += '</thead>';
-    
-    // Table body
-    html += '<tbody>';
-    books.forEach((book, index) => {
-        const bgColor = index % 2 === 0 ? 'rgba(99, 102, 241, 0.05)' : 'white';
-        html += `<tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">`;
-        
-        // Rank
-        html += `<td style="padding: 15px; text-align: center; font-weight: 700; color: #6366f1; font-size: 1.1em;">${book.rank || '-'}</td>`;
-        
-        // Last Week
-        html += `<td style="padding: 15px; text-align: center; color: #64748b;">${book.last_week || '-'}</td>`;
-        
-        // Cover Image
-        if (book.image) {
-            html += `<td style="padding: 15px; text-align: center;"><img src="${book.image}" alt="${book.title}" style="height: 80px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></td>`;
-        } else {
-            html += `<td style="padding: 15px; text-align: center;">-</td>`;
-        }
-        
-        // Title
-        html += `<td style="padding: 15px; text-align: left; font-weight: 600; color: #1e293b;">${book.title || '-'}</td>`;
-        
-        // Author
-        html += `<td style="padding: 15px; text-align: left; color: #64748b;">${book.author || '-'}</td>`;
-        
-        // Publisher
-        html += `<td style="padding: 15px; text-align: left; color: #64748b; font-size: 0.9em;">${book.publisher || '-'}</td>`;
-        
-        html += '</tr>';
-    });
-    html += '</tbody>';
-    html += '</table></div>';
-    
-    return html;
+        table th:last-child {*
 }
-        }
-
-        function switchTab(genre) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(`tab-${genre}`).classList.add('active');
-        }
-
-        refreshData();
-</script>
-</body>
-</html>
