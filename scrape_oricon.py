@@ -47,7 +47,7 @@ def scrape_oricon(url, genre):
     print(f"\n🔄 Scraping {genre} from Oricon...")
     
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
     }
     
     try:
@@ -61,80 +61,76 @@ def scrape_oricon(url, genre):
         soup = BeautifulSoup(response.content, 'html.parser')
         
         books = []
+        rank = 1
         
-        # Find ranking items - Oricon structure
-        # Look for rows in the ranking table
-        ranking_rows = soup.find_all('tr', class_='js-ranking-item')
+        # Chercher la table de classement Oricon
+        # Oricon utilise une structure spécifique
         
-        if not ranking_rows:
-            ranking_rows = soup.find_all('tr', {'data-rank': True})
+        # Méthode 1: Chercher les rows de classement
+        ranking_items = soup.find_all('div', class_='ranking-item')
         
-        if not ranking_rows:
-            # Fallback: look for divs with ranking data
-            ranking_rows = soup.find_all('div', class_='ranking-item')
+        if not ranking_items:
+            # Méthode 2: Chercher les lignes du tableau
+            ranking_items = soup.find_all('tr', class_='js-ranking-item')
         
-        print(f"   📊 Found {len(ranking_rows)} items")
+        if not ranking_items:
+            # Méthode 3: Structure générale Oricon
+            ranking_items = soup.select('.ranking-item, .rankingItem, [data-rank]')
         
-        for idx, item in enumerate(ranking_rows[:10], 1):  # Top 10
+        print(f"   Found {len(ranking_items)} items")
+        
+        for item in ranking_items[:10]:  # Top 10
             try:
-                # Extract rank
-                rank = idx
-                rank_elem = item.find('span', class_='rank-no')
-                if rank_elem:
-                    try:
-                        rank = int(rank_elem.get_text(strip=True))
-                    except:
-                        rank = idx
+                # Extraire les données
                 
-                # Extract title
+                # Titre
                 title_elem = item.find('a', class_='title')
                 if not title_elem:
-                    title_elem = item.find('span', class_='title')
-                if not title_elem:
                     title_elem = item.find('p', class_='title')
+                if not title_elem:
+                    title_elem = item.find('span', class_='title')
                 
                 if not title_elem:
                     continue
                 
                 title = title_elem.get_text(strip=True)
                 
-                # Extract author
+                # Auteur
                 author_elem = item.find('span', class_='artist')
                 if not author_elem:
                     author_elem = item.find('a', class_='artist')
                 if not author_elem:
                     author_elem = item.find('p', class_='artist')
-                if not author_elem:
-                    author_elem = item.find('td', {'data-column': 'artist'})
                 
                 author = author_elem.get_text(strip=True) if author_elem else "-"
                 
-                # Extract publisher
+                # Éditeur
                 publisher_elem = item.find('span', class_='publisher')
                 if not publisher_elem:
                     publisher_elem = item.find('p', class_='publisher')
                 if not publisher_elem:
                     publisher_elem = item.find('td', class_='publisher')
-                if not publisher_elem:
-                    publisher_elem = item.find('td', {'data-column': 'publisher'})
                 
                 publisher = publisher_elem.get_text(strip=True) if publisher_elem else "-"
                 
-                # Extract sales
-                sales_elem = item.find('span', class_='sales-count')
+                # Ventes estimées
+                sales_elem = item.find('span', class_='sales')
                 if not sales_elem:
                     sales_elem = item.find('p', class_='sales')
                 if not sales_elem:
                     sales_elem = item.find('td', class_='sales')
-                if not sales_elem:
-                    sales_elem = item.find('td', {'data-column': 'sales'})
                 
                 sales = sales_elem.get_text(strip=True) if sales_elem else "-"
                 
+                # Rang (si pas déjà incrémenté)
+                rank_elem = item.find('span', class_='rank')
+                if rank_elem:
+                    try:
+                        rank = int(rank_elem.get_text(strip=True))
+                    except:
+                        pass
+                
                 print(f"   {rank}. {title}")
-                print(f"      Auteur: {author}")
-                print(f"      Éditeur: {publisher}")
-                print(f"      Ventes: {sales}")
                 
                 books.append({
                     "rank": rank,
@@ -144,6 +140,8 @@ def scrape_oricon(url, genre):
                     "sales": sales
                 })
                 
+                rank += 1
+                
             except Exception as e:
                 print(f"   ⚠️  Error parsing item: {e}")
                 continue
@@ -152,14 +150,12 @@ def scrape_oricon(url, genre):
         
     except Exception as e:
         print(f"❌ Error scraping {genre}: {e}")
-        import traceback
-        traceback.print_exc()
         return []
 
 def scrape_all_oricon():
     """Scrape all Oricon categories"""
     
-    print("📚 Starting Oricon Rankings Scraper...\n")
+    print("📚 Scraping Oricon Rankings...\n")
     
     # Load corrections
     corrections = load_corrections()
@@ -182,8 +178,6 @@ def scrape_all_oricon():
     for genre, url in ORICON_URLS.items():
         books = scrape_oricon(url, genre)
         
-        print(f"\n🔍 Applying corrections for {genre}...")
-        
         # Apply corrections
         for book in books:
             correction = find_correction(book['title'], corrections)
@@ -191,23 +185,17 @@ def scrape_all_oricon():
             if correction:
                 book['author'] = correction.get('author', book['author'])
                 book['publisher'] = correction.get('publisher', book['publisher'])
-                print(f"   ✅ Correction applied: {book['title']}")
-            else:
-                print(f"   ℹ️  No correction: {book['title']}")
+                print(f"   ✅ Correction applied for: {book['title']}")
         
         data["genres"][genre] = books
         
-        print(f"✅ {genre}: {len(books)} books scraped\n")
-        
-        time.sleep(2)  # Be respectful to server
+        time.sleep(2)  # Be respectful
     
     # Save to file
     with open('oricon_books.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
-    print(f"\n" + "="*50)
-    print(f"✅ Scraping completed!")
-    print(f"="*50)
+    print(f"\n✅ Scraping completed!")
     print(f"📚 Comics: {len(data['genres']['Comics'])} books")
     print(f"📚 Paperback: {len(data['genres']['Paperback'])} books")
     print(f"📚 Light Novel: {len(data['genres']['Light Novel'])} books")
