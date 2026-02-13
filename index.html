@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="apple-touch-icon" href="favicon.svg">
-    <title>Sakuragawa Japan Book Sales Report</title>
+    <link rel="apple-touch-icon" href="favicon.svg">
+    <title>Sakuragawa Japan Book Sales Report - Oricon</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -114,25 +114,6 @@
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             border-color: transparent;
         }
-        .books-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 25px;
-        }
-        .book-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        .book-card:hover { transform: translateY(-10px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2); }
-        .book-image { width: 100%; height: 280px; object-fit: cover; background: #f0f4f8; }
-        .book-info { padding: 20px; }
-        .book-title { font-weight: 700; font-size: 1.05em; margin-bottom: 8px; }
-        .book-author { color: var(--text-light); font-size: 0.9em; margin-bottom: 12px; }
-        .book-sales { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
-        .sales-value { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700; font-size: 1.3em; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         footer { text-align: center; padding: 30px 20px; color: rgba(255, 255, 255, 0.6); margin-top: 60px; }
@@ -143,7 +124,7 @@
         <div>
             <h1>Sakuragawa Japan Book Sales Report</h1>
             <p>Top 10 Rankings by Genre</p>
-            <p style="font-size: 0.9em; opacity: 0.9; margin-top: 10px;">Source : Nippan</p>
+            <p style="font-size: 0.9em; opacity: 0.9; margin-top: 10px;">Source : Oricon</p>
         </div>
         <div class="language-buttons">
             <button class="lang-btn active" onclick="setLanguage('en')">EN</button>
@@ -174,21 +155,21 @@
         en: {
             title: 'Sakuragawa Japan Book Sales Report',
             subtitle: 'Top 10 Rankings by Genre',
-            source: 'Source : Nippan',
+            source: 'Source : Oricon',
             refresh: '🔄 Refresh',
             loading: 'Loading...'
         },
         ja: {
             title: '桜川日本書籍売上レポート',
             subtitle: 'ジャンル別トップ10ランキング',
-            source: 'ソース：日本書籍販売',
+            source: 'ソース：Oricon',
             refresh: '🔄 更新',
             loading: '読み込み中...'
         },
         fr: {
             title: 'Rapport de Ventes de Livres Sakuragawa Japon',
             subtitle: 'Classement Top 10 par Genre',
-            source: 'Source : Nippan',
+            source: 'Source : Oricon',
             refresh: '🔄 Actualiser',
             loading: 'Chargement...'
         }
@@ -210,7 +191,7 @@
     function refreshData() {
         document.getElementById('weekInfo').textContent = translations[currentLanguage].loading;
         
-        fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/nippan_books.json?t=' + Date.now())
+        fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/oricon_books.json?t=' + Date.now())
             .then(r => r.json())
             .then(data => {
                 console.log('Data loaded:', data);
@@ -252,44 +233,33 @@
         document.getElementById('weekInfo').innerHTML = `<strong>Week 7, 2026</strong> | Last updated: ${formattedDate}`;
     }
 
-        function renderBooks(books) {
+    function renderBooks(books) {
         if (!books || books.length === 0) {
             return '<p style="text-align: center; color: #999; padding: 40px;">No data available</p>';
         }
         
         let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">';
         
-        // Table header
         html += '<thead style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); color: white;">';
         html += '<tr>';
         html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Rank</th>';
-        html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Last Week</th>';
         html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Title</th>';
         html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Author</th>';
-        html += '<th style="padding: 15px; text-align: left; font-weight: 700;">Publisher</th>';
+        html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Publisher</th>';
+        html += '<th style="padding: 15px; text-align: left; font-weight: 700;">Estimated Sales</th>';
         html += '</tr>';
         html += '</thead>';
         
-        // Table body
         html += '<tbody>';
         books.forEach((book, index) => {
             const bgColor = index % 2 === 0 ? 'rgba(99, 102, 241, 0.05)' : 'white';
             html += `<tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">`;
             
-            // Rank
             html += `<td style="padding: 15px; text-align: center; font-weight: 700; color: #6366f1; font-size: 1.1em;">${book.rank || '-'}</td>`;
-            
-            // Last Week
-            html += `<td style="padding: 15px; text-align: center; color: #64748b;">${book.last_week || '-'}</td>`;
-            
-            // Title
             html += `<td style="padding: 15px; text-align: left; font-weight: 600; color: #1e293b;">${(book.title || '-').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
-            
-            // Author
             html += `<td style="padding: 15px; text-align: left; color: #64748b;">${book.author || '-'}</td>`;
-            
-            // Publisher
             html += `<td style="padding: 15px; text-align: left; color: #64748b; font-size: 0.9em;">${book.publisher || '-'}</td>`;
+            html += `<td style="padding: 15px; text-align: left; color: #64748b;">${book.sales || '-'}</td>`;
             
             html += '</tr>';
         });
@@ -308,4 +278,5 @@
 
     refreshData();
     </script>
+</body>
 </html>
