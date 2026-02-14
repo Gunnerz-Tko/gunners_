@@ -1,31 +1,66 @@
-import requests
-from bs4 import BeautifulSoup
+import os
+import json
+import time
+import re
+import datetime
 
-class OriconScraper:
-    def __init__(self, url):
-        self.url = url
-        self.data = []
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from pytesseract import image_to_string
+from PIL import Image
 
-    def scrape(self):
-        response = requests.get(self.url)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.content, 'html.parser')
-            self.parse_data(soup)
-        else:
-            print('Failed to retrieve data from Oricon')
+# Setup Chrome WebDriver with headless options
+chrome_options = Options()
+chrome_options.add_argument('--headless')
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')
 
-    def parse_data(self, soup):
-        # Example: parsing a list of items
-        items = soup.find_all('div', class_='item_class')  # Replace with actual class
-        for item in items:
-            title = item.find('h2').text
-            self.data.append(title)
+# Initialize the Chrome WebDriver
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
 
-    def get_data(self):
-        return self.data
+def scrape_with_ocr(url):
+    driver.get(url)
+    time.sleep(2)  # Wait for the page to load
+    screenshot = driver.get_screenshot_as_png()
+    with open('screenshot.png', 'wb') as f:
+        f.write(screenshot)
+    text = image_to_string(Image.open('screenshot.png'))
+    return text
 
+
+def parse_ocr_text(text):
+    books = []
+    # Assuming text parsing logic here
+    lines = text.split('\n')
+    for line in lines[1:11]:  # Get top 10 books
+        parts = line.split(',')
+        if len(parts) < 5:
+            continue
+        book = {
+            'rank': parts[0],
+            'title': parts[1],
+            'author': parts[2],
+            'publisher': parts[3],
+            'sales': parts[4]
+        }
+        books.append(book)
+    return books
+
+
+def main():
+    genres = ['Comics', 'Paperback', 'Light Novel', 'Light Literature', 'Literary']
+    all_books = []
+    for genre in genres:
+        url = f'https://www.oricon.co.jp/rank/{genre}/'
+        text = scrape_with_ocr(url)
+        books = parse_ocr_text(text)
+        all_books.extend(books)
+
+    with open('oricon_books.json', 'w') as json_file:
+        json.dump(all_books, json_file, ensure_ascii=False, indent=4)
 
 if __name__ == '__main__':
-    scraper = OriconScraper('http://www.oricon.co.jp/')  # Replace with actual URL
-    scraper.scrape()
-    print(scraper.get_data())
+    main()
