@@ -1,11 +1,11 @@
 {
-  "updated": "2026-02-14T04:59:05.901433Z",
-  "source": "oricon.co.jp",
+  "updated": "2026-02-14T09:57:01.021118Z",
+  "week": "Week 7 2026",
   "genres": {
-    "Comics": [],
-    "Paperback": [],
-    "Light Novel": [],
-    "Light Literature": [],
-    "Literary": []
-  }
+    "General": [],
+    "Literature": [],
+    "Light Novels": [],
+    "Comics": []
+  },
+  "total_genres": 4
 }
