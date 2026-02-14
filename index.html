@@ -148,6 +148,7 @@
         <p><a href="https://www.cyrilcarrere.org" target="_blank" style="color: #6366f1; text-decoration: none; font-weight: 600;">www.cyrilcarrere.org</a></p>
     </footer>
 
+    <script src="data.js"></script>
     <script>
     let currentLanguage = 'en';
 
@@ -185,19 +186,11 @@
         document.querySelectorAll('header p')[1].textContent = translations[lang].source;
         document.querySelector('.refresh-btn').textContent = translations[lang].refresh;
         
-        refreshData();
+        displayDashboard(oricon_data);
     }
 
     function refreshData() {
-        document.getElementById('weekInfo').textContent = translations[currentLanguage].loading;
-        
-        fetch('https://raw.githubusercontent.com/Gunnerz-Tko/gunners_/main/oricon_books.json?t=' + Date.now())
-            .then(r => r.json())
-            .then(data => {
-                console.log('Data loaded:', data);
-                displayDashboard(data);
-            })
-            .catch(e => console.error('Error:', e));
+        displayDashboard(oricon_data);
     }
 
     function displayDashboard(data) {
@@ -222,15 +215,23 @@
             contentContainer.appendChild(content);
         });
 
-        const updateDate = new Date(data.updated);
-        const formattedDate = updateDate.toLocaleDateString(currentLanguage === 'ja' ? 'ja-JP' : currentLanguage === 'fr' ? 'fr-FR' : 'en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        document.getElementById('weekInfo').innerHTML = `<strong>Week 7, 2026</strong> | Last updated: ${formattedDate}`;
+        try {
+            const updateDate = new Date(data.updated);
+            if (isNaN(updateDate.getTime())) {
+                throw new Error('Invalid date');
+            }
+            const formattedDate = updateDate.toLocaleDateString(currentLanguage === 'ja' ? 'ja-JP' : currentLanguage === 'fr' ? 'fr-FR' : 'en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('weekInfo').innerHTML = `<strong>Week 7, 2026</strong> | Last updated: ${formattedDate}`;
+        } catch (e) {
+            console.error('Date error:', e);
+            document.getElementById('weekInfo').innerHTML = `<strong>Week 7, 2026</strong> | Last updated: ${data.updated}`;
+        }
     }
 
     function renderBooks(books) {
@@ -276,7 +277,8 @@
         document.getElementById(`tab-${genre}`).classList.add('active');
     }
 
-    refreshData();
+    // Load data on page load
+    displayDashboard(oricon_data);
     </script>
 </body>
 </html>
