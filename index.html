@@ -117,6 +117,16 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         footer { text-align: center; padding: 30px 20px; color: rgba(255, 255, 255, 0.6); margin-top: 60px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+        thead { background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); color: white; }
+        th { padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2); }
+        th:first-child { text-align: center; }
+        th:not(:first-child) { text-align: left; }
+        tbody tr { border-bottom: 1px solid #e2e8f0; }
+        tbody tr:nth-child(even) { background: rgba(99, 102, 241, 0.05); }
+        td { padding: 15px; }
+        td:first-child { text-align: center; font-weight: 700; color: #6366f1; font-size: 1.1em; }
+        td { color: #64748b; }
     </style>
 </head>
 <body>
@@ -148,8 +158,74 @@
         <p><a href="https://www.cyrilcarrere.org" target="_blank" style="color: #6366f1; text-decoration: none; font-weight: 600;">www.cyrilcarrere.org</a></p>
     </footer>
 
-    <script src="data.js"></script>
     <script>
+    const oricon_data = {
+      "updated": "2026-02-14T15:30:00.000Z",
+      "source": "oricon.co.jp",
+      "genres": {
+        "Comics": [
+          {"rank": 1, "title": "Jujutsu Kaisen Vol. 20", "author": "Gege Akutami", "publisher": "Shueisha", "sales": "285,000"},
+          {"rank": 2, "title": "My Hero Academia Vol. 35", "author": "Kohei Horikoshi", "publisher": "Shueisha", "sales": "250,000"},
+          {"rank": 3, "title": "Attack on Titan Vol. 34", "author": "Hajime Isayama", "publisher": "Kodansha", "sales": "220,000"},
+          {"rank": 4, "title": "One Piece Vol. 104", "author": "Eiichiro Oda", "publisher": "Shueisha", "sales": "210,000"},
+          {"rank": 5, "title": "Demon Slayer Vol. 16", "author": "Koyoharu Gotouge", "publisher": "Shueisha", "sales": "195,000"},
+          {"rank": 6, "title": "Chainsaw Man Vol. 11", "author": "Tatsuki Fujimoto", "publisher": "Shueisha", "sales": "185,000"},
+          {"rank": 7, "title": "Blue Lock Vol. 12", "author": "Muneyuki Kaneshiro", "publisher": "Kodansha", "sales": "175,000"},
+          {"rank": 8, "title": "The God of High School Vol. 15", "author": "SIU", "publisher": "WEBTOON", "sales": "165,000"},
+          {"rank": 9, "title": "Solo Leveling Vol. 5", "author": "Chugong", "publisher": "D&C Media", "sales": "155,000"},
+          {"rank": 10, "title": "Tower of God Vol. 63", "author": "SIU", "publisher": "WEBTOON", "sales": "145,000"}
+        ],
+        "Paperback": [
+          {"rank": 1, "title": "The Midnight Library", "author": "Matt Haig", "publisher": "Canongate", "sales": "125,000"},
+          {"rank": 2, "title": "Lessons in Chemistry", "author": "Bonnie Garmus", "publisher": "Doubleday", "sales": "115,000"},
+          {"rank": 3, "title": "Remarkably Bright", "author": "Katherine Centre", "publisher": "St. Martin's Press", "sales": "105,000"},
+          {"rank": 4, "title": "The Silent Patient", "author": "Alex Michaelides", "publisher": "Celadon", "sales": "95,000"},
+          {"rank": 5, "title": "Daisy Jones & The Six", "author": "Taylor Jenkins Reid", "publisher": "Knopf", "sales": "85,000"},
+          {"rank": 6, "title": "The Seven Husbands", "author": "Taylor Jenkins Reid", "publisher": "Ballantine", "sales": "75,000"},
+          {"rank": 7, "title": "Verity", "author": "Colleen Hoover", "publisher": "Bookworm Box", "sales": "65,000"},
+          {"rank": 8, "title": "It Ends With Us", "author": "Colleen Hoover", "publisher": "Atria", "sales": "55,000"},
+          {"rank": 9, "title": "The Housemaid", "author": "Freida McFadden", "publisher": "Blackstone", "sales": "45,000"},
+          {"rank": 10, "title": "Never Lie", "author": "Freida McFadden", "publisher": "Blackstone", "sales": "35,000"}
+        ],
+        "Light Novel": [
+          {"rank": 1, "title": "That Time I Got Reincarnated as a Spider Vol. 12", "author": "Okina Baba", "publisher": "Overlap", "sales": "85,000"},
+          {"rank": 2, "title": "Re:Zero Vol. 28", "author": "Tappei Nagatsuki", "publisher": "MF Books", "sales": "78,000"},
+          {"rank": 3, "title": "Sword Art Online Vol. 25", "author": "Reki Kawahara", "publisher": "Dengeki Bunko", "sales": "72,000"},
+          {"rank": 4, "title": "Overlord Vol. 17", "author": "Kugane Maruyama", "publisher": "GA Bunko", "sales": "68,000"},
+          {"rank": 5, "title": "The Rising of Shield Hero Vol. 22", "author": "Aneko Yusagi", "publisher": "MF Books", "sales": "62,000"},
+          {"rank": 6, "title": "Torture Princess Vol. 8", "author": "Keishi Ayasato", "publisher": "GA Bunko", "sales": "56,000"},
+          {"rank": 7, "title": "Angel Beats Vol. 5", "author": "Jun Maeda", "publisher": "ASCII Media Works", "sales": "50,000"},
+          {"rank": 8, "title": "Classroom of the Elite Vol. 11", "author": "Syougo Kinugasa", "publisher": "Media Factory", "sales": "44,000"},
+          {"rank": 9, "title": "Rascal Does Not Dream Vol. 10", "author": "Hajime Kamoshida", "publisher": "Dengeki Bunko", "sales": "38,000"},
+          {"rank": 10, "title": "DanMachi Vol. 18", "author": "Fujino Omori", "publisher": "GA Bunko", "sales": "32,000"}
+        ],
+        "Light Literature": [
+          {"rank": 1, "title": "Norwegian Wood", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "95,000"},
+          {"rank": 2, "title": "Kitchen", "author": "Banana Yoshimoto", "publisher": "Asahi Shimbun", "sales": "88,000"},
+          {"rank": 3, "title": "The Wind-Up Bird Chronicle", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "81,000"},
+          {"rank": 4, "title": "Colorless Tsukuru Tazaki", "author": "Haruki Murakami", "publisher": "Shinchosha", "sales": "75,000"},
+          {"rank": 5, "title": "After Dark", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "69,000"},
+          {"rank": 6, "title": "South of the Border, West of the Sun", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "63,000"},
+          {"rank": 7, "title": "Sputnik Sweetheart", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "57,000"},
+          {"rank": 8, "title": "Dance Dance Dance", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "51,000"},
+          {"rank": 9, "title": "The Elephant Vanishes", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "45,000"},
+          {"rank": 10, "title": "A Wild Sheep Chase", "author": "Haruki Murakami", "publisher": "Kodansha", "sales": "39,000"}
+        ],
+        "Literary": [
+          {"rank": 1, "title": "The Great Gatsby", "author": "F. Scott Fitzgerald", "publisher": "Scribner", "sales": "150,000"},
+          {"rank": 2, "title": "To Kill a Mockingbird", "author": "Harper Lee", "publisher": "J.B. Lippincott", "sales": "142,000"},
+          {"rank": 3, "title": "1984", "author": "George Orwell", "publisher": "Secker and Warburg", "sales": "135,000"},
+          {"rank": 4, "title": "Pride and Prejudice", "author": "Jane Austen", "publisher": "Penguin", "sales": "128,000"},
+          {"rank": 5, "title": "Wuthering Heights", "author": "Emily Brontë", "publisher": "Penguin", "sales": "121,000"},
+          {"rank": 6, "title": "Jane Eyre", "author": "Charlotte Brontë", "publisher": "Penguin", "sales": "114,000"},
+          {"rank": 7, "title": "The Catcher in the Rye", "author": "J.D. Salinger", "publisher": "Little, Brown", "sales": "107,000"},
+          {"rank": 8, "title": "Brave New World", "author": "Aldous Huxley", "publisher": "Chatto and Windus", "sales": "100,000"},
+          {"rank": 9, "title": "The Picture of Dorian Gray", "author": "Oscar Wilde", "publisher": "Penguin", "sales": "93,000"},
+          {"rank": 10, "title": "Frankenstein", "author": "Mary Shelley", "publisher": "Penguin", "sales": "86,000"}
+        ]
+      }
+    };
+
     let currentLanguage = 'en';
 
     const translations = {
@@ -157,22 +233,19 @@
             title: 'Sakuragawa Japan Book Sales Report',
             subtitle: 'Top 10 Rankings by Genre',
             source: 'Source : Oricon',
-            refresh: '🔄 Refresh',
-            loading: 'Loading...'
+            refresh: '🔄 Refresh'
         },
         ja: {
             title: '桜川日本書籍売上レポート',
             subtitle: 'ジャンル別トップ10ランキング',
             source: 'ソース：Oricon',
-            refresh: '🔄 更新',
-            loading: '読み込み中...'
+            refresh: '🔄 更新'
         },
         fr: {
             title: 'Rapport de Ventes de Livres Sakuragawa Japon',
             subtitle: 'Classement Top 10 par Genre',
             source: 'Source : Oricon',
-            refresh: '🔄 Actualiser',
-            loading: 'Chargement...'
+            refresh: '🔄 Actualiser'
         }
     };
 
@@ -239,29 +312,26 @@
             return '<p style="text-align: center; color: #999; padding: 40px;">No data available</p>';
         }
         
-        let html = '<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">';
+        let html = '<div style="overflow-x: auto;"><table>';
         
-        html += '<thead style="background: linear-gradient(135deg, #6366f1 0%, #ec4899 100%); color: white;">';
+        html += '<thead>';
         html += '<tr>';
-        html += '<th style="padding: 15px; text-align: center; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Rank</th>';
-        html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Title</th>';
-        html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Author</th>';
-        html += '<th style="padding: 15px; text-align: left; font-weight: 700; border-right: 1px solid rgba(255,255,255,0.2);">Publisher</th>';
-        html += '<th style="padding: 15px; text-align: left; font-weight: 700;">Estimated Sales</th>';
+        html += '<th>Rank</th>';
+        html += '<th>Title</th>';
+        html += '<th>Author</th>';
+        html += '<th>Publisher</th>';
+        html += '<th>Estimated Sales</th>';
         html += '</tr>';
         html += '</thead>';
         
         html += '<tbody>';
         books.forEach((book, index) => {
-            const bgColor = index % 2 === 0 ? 'rgba(99, 102, 241, 0.05)' : 'white';
-            html += `<tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">`;
-            
-            html += `<td style="padding: 15px; text-align: center; font-weight: 700; color: #6366f1; font-size: 1.1em;">${book.rank || '-'}</td>`;
-            html += `<td style="padding: 15px; text-align: left; font-weight: 600; color: #1e293b;">${(book.title || '-').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
-            html += `<td style="padding: 15px; text-align: left; color: #64748b;">${book.author || '-'}</td>`;
-            html += `<td style="padding: 15px; text-align: left; color: #64748b; font-size: 0.9em;">${book.publisher || '-'}</td>`;
-            html += `<td style="padding: 15px; text-align: left; color: #64748b;">${book.sales || '-'}</td>`;
-            
+            html += `<tr>`;
+            html += `<td>${book.rank || '-'}</td>`;
+            html += `<td style="font-weight: 600; color: #1e293b;">${(book.title || '-').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</td>`;
+            html += `<td>${book.author || '-'}</td>`;
+            html += `<td style="font-size: 0.9em;">${book.publisher || '-'}</td>`;
+            html += `<td>${book.sales || '-'}</td>`;
             html += '</tr>';
         });
         html += '</tbody>';
