@@ -1,0 +1,39 @@
+name: Scrape Oricon with OCR
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-jpn chromium-browser chromium-chromedriver
+      
+      - name: Install Python dependencies
+        run: |
+          pip install selenium pytesseract pillow webdriver-manager
+      
+      - name: Run Oricon OCR scraper
+        run: python scrape_oricon_ocr.py
+      
+      - name: Commit and push
+        run: |
+          git config user.name "Oricon OCR Bot"
+          git config user.email "bot@github.com"
+          git add oricon_books.json
+          git commit -m "Update Oricon rankings via OCR - $(date)" || true
+          git push
