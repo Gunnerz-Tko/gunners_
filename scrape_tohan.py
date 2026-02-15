@@ -48,8 +48,8 @@ def download_tohan_pdf(url):
         return None
 
 def parse_tohan_pdf(pdf_path):
-    """Parse Tohan PDF and extract rankings"""
-    print("\n📖 Parsing Tohan PDF...\n")
+    """Parse Tohan PDF and extract rankings using tables"""
+    print("\n📖 Parsing Tohan PDF with table extraction...\n")
     
     data = {
         "updated": datetime.now().isoformat() + "Z",
@@ -108,7 +108,9 @@ def parse_tohan_pdf(pdf_path):
 def parse_genre_section(section_text):
     """Parse a genre section and extract book rankings
     
-    Expected format:
+    Structure:
+    【Genre】
+    書 名 著 者 出版社 本体(円) ISBNコード
     1 Title Author Publisher Price ISBN
     2 Title Author Publisher Price ISBN
     ...
@@ -118,83 +120,92 @@ def parse_genre_section(section_text):
     
     print(f"   📋 Processing {len(lines)} lines...")
     
-    i = 0
-    while i < len(lines) and len(books) < 10:
-        line = lines[i]
+    rank = None
+    title = None
+    author = None
+    publisher = None
+    price = None
+    isbn = None
+    
+    for line in lines:
+        # Skip header lines
+        if '書 名' in line or '著 者' in line or '出版社' in line or '本体(円)' in line or 'ISBNコード' in line:
+            continue
         
-        # Look for RANK number (1-10) at start of line
-        rank_match = re.match(r'^(\d+)\s+(.*)$', line)
+        if line.startswith('【'):
+            # Genre marker, skip
+            continue
         
-        if rank_match:
-            rank_num = int(rank_match.group(1))
+        # Try to match: RANK + DATA
+        # Format: "1 Title Author Publisher Price ISBN"
+        match = re.match(r'^(\d+)\s+(.+)$', line)
+        
+        if match:
+            rank_num = int(match.group(1))
             
             if 1 <= rank_num <= 10:
-                # Start collecting data for this book
-                title = ""
-                author = ""
-                publisher = ""
-                price = ""
-                isbn = ""
-                
-                # Line i: RANK + remaining text
-                remaining = rank_match.group(2).strip()
-                
-                # Check if title is on same line
-                if remaining:
-                    title = remaining
-                    current_line = i + 1
-                else:
-                    # Title is on next line
-                    if i + 1 < len(lines):
-                        title = lines[i + 1]
-                    current_line = i + 2
-                
-                # Now collect author, publisher, price, ISBN from following lines
-                # until we hit another RANK or end
-                data_lines = []
-                j = current_line
-                while j < len(lines):
-                    next_line = lines[j]
-                    
-                    # Check if this is a new RANK
-                    if re.match(r'^(\d+)\s+', next_line):
-                        break
-                    
-                    data_lines.append(next_line)
-                    j += 1
-                
-                # Parse data_lines: author, publisher, price, isbn
-                if len(data_lines) > 0:
-                    author = data_lines[0]
-                
-                if len(data_lines) > 1:
-                    publisher = data_lines[1]
-                
-                if len(data_lines) > 2:
-                    price = data_lines[2]
-                
-                if len(data_lines) > 3:
-                    isbn = data_lines[3]
-                
-                # Validate data
-                if title and len(title) > 2:
+                # Save previous book if exists
+                if rank is not None and title:
                     books.append({
-                        "rank": rank_num,
+                        "rank": rank,
                         "title": title.strip(),
                         "author": author.strip() if author else "-",
                         "publisher": publisher.strip() if publisher else "-",
                         "price": price.strip() if price else "-",
                         "isbn": isbn.strip() if isbn else "-"
                     })
-                    
-                    print(f"      ✓ Rank {rank_num}: {title} | {author}")
+                    print(f"      ✓ Rank {rank}: {title}")
                 
-                i = j
-                continue
-        
-        i += 1
+                # Start new book
+                rank = rank_num
+                remaining_data = match.group(2).strip()
+                
+                # Split by common delimiters (multiple spaces, tabs)
+                parts = re.split(r'\s{2,}|\t', remaining_data)
+                
+                title = parts[0] if len(parts) > 0 else ""
+                author = parts[1] if len(parts) > 1 else ""
+                publisher = parts[2] if len(parts) > 2 else ""
+                price = parts[3] if len(parts) > 3 else ""
+                isbn = parts[4] if len(parts) > 4 else ""
+        else:
+            # This might be continuation of previous data (multi-line)
+            # Try to detect what field this is
+            if re.match(r'^978-', line):
+                # This is ISBN
+                isbn = line
+            elif re.match(r'^[\d,]+$', line):
+                # This is PRICE
+                if not price:
+                    price = line
+                else:
+                    isbn = line
+            elif '社' in line or '出版' in line.lower():
+                # This might be publisher
+                if not publisher:
+                    publisher = line
+                else:
+                    isbn = line
+            elif not author and title:
+                # This might be author
+                author = line
+            elif not publisher and title and author:
+                # This might be publisher
+                publisher = line
     
-    return books
+    # Don't forget last book
+    if rank is not None and title:
+        books.append({
+            "rank": rank,
+            "title": title.strip(),
+            "author": author.strip() if author else "-",
+            "publisher": publisher.strip() if publisher else "-",
+            "price": price.strip() if price else "-",
+            "isbn": isbn.strip() if isbn else "-"
+        })
+        print(f"      ✓ Rank {rank}: {title}")
+    
+    return books[:10]  # Return top 10
 
 def main():
     print("📚 Starting Tohan PDF Scraper...\n")
