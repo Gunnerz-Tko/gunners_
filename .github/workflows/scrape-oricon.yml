@@ -2,8 +2,8 @@ name: Scrape Oricon with OCR
 
 on:
   schedule:
-    - cron: '0 3 * * *'  # Daily at 3 AM UTC
-  workflow_dispatch:  # Manual trigger
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 jobs:
   scrape:
@@ -22,17 +22,20 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            tesseract-ocr \
-            tesseract-ocr-jpn \
             chromium-browser \
-            chromium-chromedriver
+            chromium-chromedriver \
+            libsm6 \
+            libxext6 \
+            libxrender-dev
       
       - name: Install Python dependencies
         run: |
-          pip install selenium easyocr pillow webdriver-manager torch torchvision
+          pip install --upgrade pip
+          pip install selenium easyocr pillow webdriver-manager
       
       - name: Run Oricon OCR scraper
         run: python scrape_oricon_ocr.py
+        timeout-minutes: 30
       
       - name: Commit and push changes
         run: |
