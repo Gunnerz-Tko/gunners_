@@ -1,1 +1,11 @@
-[]
+{
+  "updated": "2026-02-15T09:58:08.583729Z",
+  "week": "Week 7 2026",
+  "genres": {
+    "General": [],
+    "Literature": [],
+    "Light Novels": [],
+    "Comics": []
+  },
+  "total_genres": 4
+}
