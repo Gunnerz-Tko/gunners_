@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pytesseract
-from PIL import Image
+from PIL import Image, ImageOps
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +42,21 @@ def setup_driver():
     
     return driver
 
+def preprocess_image(image_path):
+    """Preprocess image for better OCR"""
+    img = Image.open(image_path)
+    
+    # Convert to grayscale
+    img = img.convert('L')
+    
+    # Increase contrast
+    img = ImageOps.autocontrast(img)
+    
+    # Upscale 2x for better recognition
+    img = img.resize((img.width * 2, img.height * 2), Image.Resampling.LANCZOS)
+    
+    return img
+
 def scrape_oricon_page(url, genre):
     """Scrape Oricon page with Tesseract OCR"""
     print(f"\n🔄 Scraping {genre}...")
@@ -65,26 +80,39 @@ def scrape_oricon_page(url, genre):
         
         print(f"   📸 Screenshot saved")
         
-        # Tesseract OCR (Japanese config)
-        print(f"   🔍 Running Tesseract OCR...")
-        image = Image.open(screenshot_path)
+        # Preprocess image for better OCR
+        print(f"   🖼️  Preprocessing image...")
+        processed_img = preprocess_image(screenshot_path)
         
-        # Use jpn config for better Japanese recognition
-        ocr_text = pytesseract.image_to_string(image, lang='jpn')
+        # Save processed image
+        processed_path = f'/tmp/oricon_{genre}_processed.png'
+        processed_img.save(processed_path)
+        
+        # Tesseract OCR with Japanese config
+        print(f"   🔍 Running Tesseract OCR (Japanese)...")
+        
+        # Use jpn_vert config for vertical text + jpn for horizontal
+        ocr_text = pytesseract.image_to_string(processed_path, lang='jpn', config='--psm 6')
         
         print(f"   📝 OCR text extracted ({len(ocr_text)} chars)")
+        
+        # Debug: Print first 500 chars
+        if ocr_text:
+            print(f"   📋 First 500 chars of OCR:\n{ocr_text[:500]}\n")
         
         # Parse OCR text
         books = parse_ocr_text(ocr_text)
         
         print(f"   ✅ {genre}: {len(books)} books extracted")
         
-        # Log first book for debugging
         if books:
             print(f"      Sample: Rank {books[0]['rank']} - {books[0]['title']}")
         
+        # Cleanup
         if os.path.exists(screenshot_path):
             os.remove(screenshot_path)
+        if os.path.exists(processed_path):
+            os.remove(processed_path)
         
         return books[:10]
     
@@ -101,22 +129,22 @@ def scrape_oricon_page(url, genre):
 def parse_ocr_text(ocr_text):
     """Parse Tesseract OCR text to extract book rankings
     
-    Expected format from Oricon:
-    1
-    チェンソーマン 23
-    藤本タツキ
-    集英社
-    2026年02月
-    572円
-    81,020
-    
-    2
-    ...
+    Look for Japanese characters pattern:
+    - Rank: 1-10 (digits)
+    - Title: Japanese + digits
+    - Author: Japanese
+    - Publisher: Japanese  
+    - Sales: digits with comma
     """
     books = []
     lines = [line.strip() for line in ocr_text.split('\n') if line.strip()]
     
     print(f"   📋 Processing {len(lines)} OCR lines...")
+    
+    # Print all lines for debugging
+    print(f"   🔍 OCR Lines:")
+    for idx, line in enumerate(lines[:20]):
+        print(f"      {idx}: {repr(line)}")
     
     i = 0
     rank_found = 0
@@ -124,41 +152,30 @@ def parse_ocr_text(ocr_text):
     while i < len(lines) and rank_found < 10:
         line = lines[i]
         
-        # Look for rank number (1-10)
+        # Look for rank number (1-10) - should be standalone
         rank_match = re.match(r'^(\d+)$', line)
         
         if rank_match:
             rank_num = int(rank_match.group(1))
             
             if 1 <= rank_num <= 10:
-                print(f"      Found Rank {rank_num} at line {i}")
+                print(f"      🎯 Found Rank {rank_num} at line {i}")
                 
-                # Title should be next
-                title = ""
-                author = ""
-                publisher = ""
-                sales = ""
+                # Collect next 7 lines as potential data
+                data_lines = []
+                for j in range(i + 1, min(i + 8, len(lines))):
+                    data_lines.append(lines[j])
                 
-                if i + 1 < len(lines):
-                    title = lines[i + 1]
+                print(f"         Data lines: {data_lines}")
                 
-                if i + 2 < len(lines):
-                    author = lines[i + 2]
+                title = data_lines[0] if len(data_lines) > 0 else ""
+                author = data_lines[1] if len(data_lines) > 1 else ""
+                publisher = data_lines[2] if len(data_lines) > 2 else ""
+                sales = data_lines[6] if len(data_lines) > 6 else ""
                 
-                if i + 3 < len(lines):
-                    publisher = lines[i + 3]
-                
-                # Sales might be 3-4 lines after publisher
-                for j in range(i + 4, min(i + 8, len(lines))):
-                    line_check = lines[j]
-                    # Sales line contains numbers
-                    if re.search(r'\d{3,}', line_check):
-                        sales = line_check
-                        break
-                
-                # Validate and clean data
-                if title and len(title) > 2 and not re.match(r'^[\d\s]+$', title):
-                    # Clean sales (keep only digits and comma)
+                # Validate: title should contain Japanese or have reasonable length
+                if title and len(title) > 1:
+                    # Clean sales
                     sales_clean = re.sub(r'[^\d,]', '', sales)
                     
                     books.append({
@@ -169,7 +186,7 @@ def parse_ocr_text(ocr_text):
                         "sales": sales_clean if sales_clean else "-"
                     })
                     
-                    print(f"         ✓ {title}")
+                    print(f"         ✓ Added: {title}")
                     rank_found += 1
                     i += 8
                     continue
@@ -179,7 +196,7 @@ def parse_ocr_text(ocr_text):
     return books
 
 def main():
-    print("📚 Starting Oricon OCR Scraper (Tesseract)...\n")
+    print("📚 Starting Oricon OCR Scraper (Tesseract + Japanese)...\n")
     print(f"⏰ Time: {datetime.now().isoformat()}\n")
     
     data = {
