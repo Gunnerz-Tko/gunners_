@@ -1,4 +1,4 @@
-name: Scrape Oricon with OCR
+name: Scrape Tohan with PDF
 
 on:
   schedule:
@@ -18,31 +18,22 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            tesseract-ocr \
-            tesseract-ocr-jpn \
-            chromium-browser \
-            chromium-chromedriver
-      
       - name: Install Python dependencies
         run: |
-          pip install selenium pytesseract pillow webdriver-manager
+          pip install pdfplumber requests
       
       - name: Run Tohan PDF scraper
         run: python scrape_oricon_ocr.py
-        timeout-minutes: 20
+        timeout-minutes: 10
       
       - name: Commit and push changes
         run: |
-          git config user.name "Oricon Scraper Bot"
+          git config user.name "Tohan Scraper Bot"
           git config user.email "bot@github.com"
           git add data.js
           if git diff --quiet && git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update Oricon rankings via OCR - $(date)"
+            git commit -m "Update Tohan rankings - $(date)"
             git push
           fi
