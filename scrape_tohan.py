@@ -108,93 +108,91 @@ def parse_tohan_pdf(pdf_path):
 def parse_genre_section(section_text):
     """Parse a genre section and extract book rankings"""
     books = []
+    lines = [line.strip() for line in section_text.split('\n') if line.strip()]
     
-    lines = section_text.split('\n')
+    print(f"   📋 Processing {len(lines)} lines...")
     
-    current_rank = None
-    current_title = None
-    current_author = None
-    current_publisher = None
-    current_price = None
-    current_isbn = None
-    
-    for line in lines:
-        line = line.strip()
+    i = 0
+    while i < len(lines) and len(books) < 10:
+        line = lines[i]
         
-        if not line:
-            continue
-        
-        # Look for rank number (1-10)
+        # Look for rank number (1-10) at start of line
         rank_match = re.match(r'^(\d+)\s+', line)
         
         if rank_match:
-            # Save previous book if exists
-            if current_rank and current_title:
-                books.append({
-                    "rank": current_rank,
-                    "title": current_title,
-                    "author": current_author or "-",
-                    "publisher": current_publisher or "-",
-                    "price": current_price or "-",
-                    "isbn": current_isbn or "-"
-                })
+            rank_num = int(rank_match.group(1))
             
-            # Start new book
-            current_rank = int(rank_match.group(1))
-            
-            # Extract title from rest of line
-            rest = line[rank_match.end():].strip()
-            current_title = rest if rest else None
-            current_author = None
-            current_publisher = None
-            current_price = None
-            current_isbn = None
+            if 1 <= rank_num <= 10:
+                # Get the rest of the line after rank
+                rest_of_line = line[rank_match.end():].strip()
+                
+                # Title is the rest of this line
+                title = rest_of_line
+                
+                # Next line should be author (contains ／著 or ／作)
+                author = ""
+                publisher = ""
+                price = ""
+                isbn = ""
+                
+                if i + 1 < len(lines):
+                    next_line = lines[i + 1]
+                    
+                    # Check if it contains author marker
+                    if '／著' in next_line or '／作' in next_line:
+                        # Extract author (before the marker)
+                        if '／著' in next_line:
+                            author = next_line.split('／著')[0].strip()
+                        else:
+                            author = next_line.split('／作')[0].strip()
+                    else:
+                        # No author marker, might be author or publisher
+                        author = next_line
+                
+                # Next line should be publisher or price
+                if i + 2 < len(lines):
+                    next_line2 = lines[i + 2]
+                    
+                    if re.match(r'^[\d,]+$', next_line2):
+                        # This is price
+                        price = next_line2
+                        # Then publisher was at i+1
+                        publisher = author
+                        author = lines[i + 1]
+                    else:
+                        # This is publisher
+                        publisher = next_line2
+                
+                # Next line should be price (if not already found)
+                if i + 3 < len(lines) and not price:
+                    next_line3 = lines[i + 3]
+                    if re.match(r'^[\d,]+$', next_line3):
+                        price = next_line3
+                
+                # Next line should be ISBN (if found)
+                if i + 4 < len(lines):
+                    next_line4 = lines[i + 4]
+                    if re.match(r'^978-', next_line4):
+                        isbn = next_line4
+                
+                # Validate data
+                if title and len(title) > 2:
+                    books.append({
+                        "rank": rank_num,
+                        "title": title.strip(),
+                        "author": author.strip() if author else "-",
+                        "publisher": publisher.strip() if publisher else "-",
+                        "price": price.strip() if price else "-",
+                        "isbn": isbn.strip() if isbn else "-"
+                    })
+                    
+                    print(f"      ✓ Rank {rank_num}: {title}")
+                    i += 5
+                    continue
         
-        elif current_rank and not current_author:
-            # Next line after rank is usually author
-            if '／著' in line:
-                current_author = line.replace('／著', '').strip()
-            elif '／作' in line:
-                current_author = line.replace('／作', '').strip()
-            elif re.match(r'^[\d,]+$', line):
-                # This might be price
-                current_price = line
-            else:
-                current_author = line
-        
-        elif current_rank and current_author and not current_publisher:
-            # After author comes publisher
-            if re.match(r'^[\d,]+$', line):
-                current_price = line
-            elif re.match(r'^978-', line):
-                current_isbn = line
-            else:
-                current_publisher = line
-        
-        elif current_rank and current_publisher and not current_price:
-            # After publisher comes price
-            if re.match(r'^[\d,]+$', line):
-                current_price = line
-            elif re.match(r'^978-', line):
-                current_isbn = line
-        
-        elif current_rank and current_price and not current_isbn:
-            # After price comes ISBN
-            if re.match(r'^978-', line):
-                current_isbn = line
+        i += 1
     
-    # Don't forget last book
-    if current_rank and current_title:
-        books.append({
-            "rank": current_rank,
-            "title": current_title,
-            "author": current_author or "-",
-            "publisher": current_publisher or "-",
-            "price": current_price or "-",
-            "isbn": current_isbn or "-"
-        })
-    
-    return books[:10]  # Return top 10
+    return books
 
 def main():
     print("📚 Starting Tohan PDF Scraper...\n")
