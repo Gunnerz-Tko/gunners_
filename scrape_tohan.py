@@ -61,24 +61,17 @@ def parse_tohan_pdf(pdf_path):
         with pdfplumber.open(pdf_path) as pdf:
             print(f"Total pages: {len(pdf.pages)}\n")
             
-            # First pass: extract all text to find genres
-            full_text = ""
-            for page in pdf.pages:
-                full_text += page.extract_text() + "\n"
-            
-            # Track current genre
-            current_genre = None
-            
             # Iterate through all pages
             for page_idx, page in enumerate(pdf.pages):
                 print(f"📄 Page {page_idx + 1}...")
                 
                 page_text = page.extract_text()
                 
-                # Check if page contains genre markers
+                # Find ALL genres mentioned on this page
+                genres_on_page = []
                 for genre in GENRES:
                     if f"【{genre}】" in page_text:
-                        current_genre = genre
+                        genres_on_page.append(genre)
                         print(f"   Found genre: {genre}")
                 
                 # Extract tables from page
@@ -87,9 +80,17 @@ def parse_tohan_pdf(pdf_path):
                 if not tables:
                     continue
                 
-                # Process each table on page
-                for table_idx, table in enumerate(tables):
+                # Assign tables to genres found on page
+                # Tables should be in order matching genres
+                table_count = 0
+                for genre_idx, genre in enumerate(genres_on_page):
+                    if table_count >= len(tables):
+                        break
+                    
+                    table = tables[table_count]
+                    
                     if not table or len(table) < 2:
+                        table_count += 1
                         continue
                     
                     # Get headers
@@ -97,20 +98,21 @@ def parse_tohan_pdf(pdf_path):
                     
                     # Check if this is a ranking table
                     if not is_ranking_table(headers):
+                        table_count += 1
                         continue
                     
-                    if not current_genre:
-                        print(f"   ⚠️  Table found but no genre identified, skipping")
-                        continue
-                    
-                    print(f"   Processing table for: {current_genre}")
+                    print(f"   Processing table for: {genre}")
                     
                     # Parse table rows
                     books = parse_table_rows(table[1:])
                     
                     if books:
-                        data["genres"][current_genre] = books
-                        print(f"   ✅ {len(books)} books extracted\n")
+                        data["genres"][genre] = books
+                        print(f"   ✅ {len(books)} books extracted")
+                    
+                    table_count += 1
+                
+                print()
         
         return data
     
