@@ -1,9 +1,9 @@
-name: Scrape Oricon Rankings
+name: Scrape Oricon with OCR
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
-  workflow_dispatch:
+    - cron: '0 3 * * *'  # Daily at 3 AM UTC
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   scrape:
@@ -13,22 +13,35 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
       
-      - name: Set up Python
+      - name: Set up Python 3.11
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
-          pip install requests beautifulsoup4
+          sudo apt-get update
+          sudo apt-get install -y \
+            tesseract-ocr \
+            tesseract-ocr-jpn \
+            chromium-browser \
+            chromium-chromedriver
       
-      - name: Run Oricon scraper
-        run: python scrape_oricon.py
+      - name: Install Python dependencies
+        run: |
+          pip install selenium pytesseract pillow webdriver-manager beautifulsoup4 requests
       
-      - name: Commit and push
+      - name: Run Oricon OCR scraper
+        run: python scrape_oricon_ocr.py
+      
+      - name: Commit and push changes
         run: |
           git config user.name "Oricon Scraper Bot"
           git config user.email "bot@github.com"
-          git add oricon_books.json
-          git commit -m "Update Oricon rankings - $(date)" || true
-          git push
+          git add data.js
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update Oricon rankings via OCR - $(date)"
+            git push
+          fi
