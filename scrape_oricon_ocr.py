@@ -9,7 +9,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import pytesseract
+import easyocr
 from PIL import Image
 import logging
 
@@ -32,7 +32,6 @@ def setup_driver():
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--window-size=1920,1080')
-    options.add_argument('--start-maximized')
     options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
     
     try:
@@ -44,8 +43,8 @@ def setup_driver():
     
     return driver
 
-def scrape_oricon_page(url, genre):
-    """Scrape Oricon page with OCR"""
+def scrape_oricon_page(url, genre, reader):
+    """Scrape Oricon page with EasyOCR"""
     print(f"\n🔄 Scraping {genre}...")
     
     driver = None
@@ -54,7 +53,7 @@ def scrape_oricon_page(url, genre):
     try:
         driver = setup_driver()
         driver.get(url)
-        time.sleep(3)
+        time.sleep(4)
         
         # Scroll to load all content
         for _ in range(5):
@@ -65,20 +64,21 @@ def scrape_oricon_page(url, genre):
         screenshot_path = f'/tmp/oricon_{genre}.png'
         driver.save_screenshot(screenshot_path)
         
-        # OCR extraction
-        image = Image.open(screenshot_path)
-        ocr_text = pytesseract.image_to_string(image, lang='jpn+eng')
+        print(f"   📸 Screenshot saved: {screenshot_path}")
         
-        # Parse OCR text pour extraire les livres
-        books = parse_oricon_ocr(ocr_text)
+        # EasyOCR extraction (Japanese + English)
+        print(f"   🔍 Running EasyOCR on image...")
+        results = reader.readtext(screenshot_path, detail=1)
         
-        print(f"   ✅ {genre}: {len(books)} books extracted via OCR")
+        # Convert OCR results to text
+        ocr_text = "\n".join([text[1] for text in results])
         
-        # Fallback: Extract from HTML structure if OCR fails
-        if len(books) < 5:
-            print(f"   ⚠️  OCR result too small, trying HTML extraction...")
-            books = extract_from_html(driver)
-            print(f"   ✅ {genre}: {len(books)} books extracted from HTML")
+        print(f"   📝 OCR text extracted ({len(ocr_text)} chars)")
+        
+        # Parse OCR text
+        books = parse_ocr_text(ocr_text)
+        
+        print(f"   ✅ {genre}: {len(books)} books extracted")
         
         if os.path.exists(screenshot_path):
             os.remove(screenshot_path)
@@ -87,107 +87,86 @@ def scrape_oricon_page(url, genre):
     
     except Exception as e:
         logger.error(f"Error scraping {genre}: {e}")
+        import traceback
+        traceback.print_exc()
         return []
     
     finally:
         if driver:
             driver.quit()
 
-def parse_oricon_ocr(ocr_text):
-    """Parse OCR text to extract book rankings"""
+def parse_ocr_text(ocr_text):
+    """Parse EasyOCR text to extract book rankings
+    
+    Format expected:
+    1
+    チェンソーマン 23
+    藤本タツキ
+    集英社
+    2026年02月
+    572円(税込)
+    81,020
+    """
     books = []
     lines = [line.strip() for line in ocr_text.split('\n') if line.strip()]
     
     i = 0
-    rank = 1
     
-    while i < len(lines) and rank <= 10:
+    while i < len(lines) and len(books) < 10:
         line = lines[i]
         
         # Look for rank number (1-10)
-        if re.match(r'^[0-9]+$', line):
-            rank_num = int(line)
+        rank_match = re.match(r'^(\d+)$', line)
+        
+        if rank_match:
+            rank = int(rank_match.group(1))
             
-            if 1 <= rank_num <= 10:
-                # Extract next lines
-                title = lines[i + 1] if i + 1 < len(lines) else ""
-                author = lines[i + 2] if i + 2 < len(lines) else ""
-                publisher = lines[i + 3] if i + 3 < len(lines) else ""
-                # Skip published date (i+4)
-                sales = lines[i + 5] if i + 5 < len(lines) else ""
-                
-                if title and len(title) > 2:  # Valid title
-                    # Clean up sales number
-                    sales_clean = re.sub(r'[^0-9,]', '', sales)
+            if 1 <= rank <= 10:
+                # Next line should be title
+                if i + 1 < len(lines):
+                    title = lines[i + 1]
                     
-                    books.append({
-                        "rank": rank_num,
-                        "title": title,
-                        "author": author if author else "-",
-                        "publisher": publisher if publisher else "-",
-                        "sales": sales_clean if sales_clean else "-"
-                    })
+                    # Next line should be author
+                    author = lines[i + 2] if i + 2 < len(lines) else "-"
                     
-                    i += 6
-                    continue
+                    # Next line should be publisher
+                    publisher = lines[i + 3] if i + 3 < len(lines) else "-"
+                    
+                    # Skip date (i+4)
+                    # Skip price (i+5)
+                    
+                    # Sales should be at i+6
+                    sales = lines[i + 6] if i + 6 < len(lines) else "-"
+                    
+                    # Clean up sales (remove non-digits except comma)
+                    sales_clean = re.sub(r'[^\d,]', '', sales)
+                    
+                    # Validate title (should not be empty or a number)
+                    if title and len(title) > 2 and not re.match(r'^\d+$', title):
+                        books.append({
+                            "rank": rank,
+                            "title": title,
+                            "author": author if author and author != "-" else "-",
+                            "publisher": publisher if publisher and publisher != "-" else "-",
+                            "sales": sales_clean if sales_clean else "-"
+                        })
+                        
+                        print(f"      Rank {rank}: {title} by {author}")
+                        i += 7
+                        continue
         
         i += 1
     
     return books
 
-def extract_from_html(driver):
-    """Fallback: Extract data from HTML structure"""
-    books = []
-    
-    try:
-        # Find all ranking items
-        items = driver.find_elements(By.CLASS_NAME, "rank")
-        
-        for idx, item in enumerate(items[:10]):
-            try:
-                rank = idx + 1
-                
-                # Title (blue, clickable link)
-                title_elem = item.find_element(By.TAG_NAME, "a")
-                title = title_elem.text.strip()
-                
-                # Author (bold)
-                author_elem = item.find_element(By.CSS_SELECTOR, "strong")
-                author = author_elem.text.strip()
-                
-                # Publisher
-                all_text = item.text.split('\n')
-                publisher = ""
-                sales = ""
-                
-                # Parse text structure
-                for j, text in enumerate(all_text):
-                    if '出版社' in text or j > 2:
-                        publisher = all_text[j + 1] if j + 1 < len(all_text) else ""
-                    if '推定売上' in text or '売上' in text:
-                        sales = re.sub(r'[^0-9,]', '', all_text[j + 1] if j + 1 < len(all_text) else "")
-                
-                if title:
-                    books.append({
-                        "rank": rank,
-                        "title": title,
-                        "author": author if author else "-",
-                        "publisher": publisher if publisher else "-",
-                        "sales": sales if sales else "-"
-                    })
-            
-            except Exception as e:
-                logger.debug(f"Error parsing item {idx}: {e}")
-                continue
-    
-    except Exception as e:
-        logger.error(f"Error extracting from HTML: {e}")
-    
-    return books
-
 def main():
-    print("📚 Starting Oricon OCR Scraper...\n")
+    print("📚 Starting Oricon OCR Scraper (EasyOCR)...\n")
     print(f"⏰ Time: {datetime.now().isoformat()}\n")
+    
+    # Initialize EasyOCR reader (Japanese + English)
+    print("🚀 Initializing EasyOCR reader...")
+    reader = easyocr.Reader(['ja', 'en'], gpu=False)
+    print("✅ EasyOCR ready!\n")
     
     data = {
         "updated": datetime.now().isoformat() + "Z",
@@ -196,7 +175,7 @@ def main():
     }
     
     for genre, url in ORICON_URLS.items():
-        books = scrape_oricon_page(url, genre)
+        books = scrape_oricon_page(url, genre, reader)
         data["genres"][genre] = books
         time.sleep(3)  # Be polite to Oricon
     
@@ -210,8 +189,12 @@ def main():
         print(f"\n✅ Successfully saved data.js")
         print(f"📊 Total genres: {len(data['genres'])}")
         
+        total_books = 0
         for genre, books in data['genres'].items():
             print(f"   - {genre}: {len(books)} books")
+            total_books += len(books)
+        
+        print(f"\n📈 Total books scraped: {total_books}")
     
     except Exception as e:
         logger.error(f"Error saving data.js: {e}")
