@@ -29,7 +29,7 @@ jobs:
       
       - name: Install Python dependencies
         run: |
-          pip install selenium pytesseract pillow webdriver-manager beautifulsoup4 requests
+          pip install selenium easyocr pillow webdriver-manager torch torchvision
       
       - name: Run Oricon OCR scraper
         run: python scrape_oricon_ocr.py
