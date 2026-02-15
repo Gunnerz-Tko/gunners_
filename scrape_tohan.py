@@ -10,10 +10,8 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Tohan PDF URL
 TOHAN_PDF_URL = "https://www.tohan.jp/wp/wp-content/uploads/2026/02/202601.pdf"
 
-# Genre order
 GENRES = [
     "総合",
     "文芸書",
@@ -40,7 +38,7 @@ def download_tohan_pdf(url):
         with open(pdf_path, 'wb') as f:
             f.write(response.content)
         
-        print(f"✅ PDF downloaded ({len(response.content)} bytes)")
+        print(f"✅ PDF downloaded ({len(response.content)} bytes)\n")
         return pdf_path
     
     except Exception as e:
@@ -49,7 +47,7 @@ def download_tohan_pdf(url):
 
 def parse_tohan_pdf(pdf_path):
     """Parse Tohan PDF and extract rankings from text"""
-    print("\n📖 Parsing Tohan PDF...\n")
+    print("📖 Parsing Tohan PDF...\n")
     
     data = {
         "updated": datetime.now().isoformat() + "Z",
@@ -61,7 +59,7 @@ def parse_tohan_pdf(pdf_path):
         with pdfplumber.open(pdf_path) as pdf:
             print(f"Total pages: {len(pdf.pages)}\n")
             
-            # Extract all text from PDF
+            # Extract all text
             full_text = ""
             for page in pdf.pages:
                 full_text += page.extract_text() + "\n"
@@ -70,28 +68,25 @@ def parse_tohan_pdf(pdf_path):
             for genre in GENRES:
                 print(f"🔍 Extracting 【{genre}】...")
                 
-                # Find genre section
                 genre_pattern = f"【{genre}】"
                 
                 if genre_pattern not in full_text:
                     print(f"   ⚠️  Not found\n")
                     continue
                 
-                # Find start of this genre section
+                # Find start and end of genre section
                 start_idx = full_text.find(genre_pattern)
                 
-                # Find start of next genre section (or end of document)
                 end_idx = len(full_text)
                 for next_genre in GENRES:
                     if next_genre != genre:
-                        next_idx = full_text.find(f"【{next_genre}��", start_idx + 1)
+                        next_idx = full_text.find(f"【{next_genre}】", start_idx + 1)
                         if next_idx != -1 and next_idx < end_idx:
                             end_idx = next_idx
                 
-                # Extract genre section
                 genre_section = full_text[start_idx:end_idx]
                 
-                # Parse books in this section
+                # Parse books
                 books = parse_genre_section(genre_section)
                 
                 if books:
@@ -109,143 +104,151 @@ def parse_tohan_pdf(pdf_path):
         return None
 
 def parse_genre_section(section_text):
-    """Parse a genre section and extract book rankings"""
+    """Parse a genre section and extract books"""
     books = []
-    lines = [line.strip() for line in section_text.split('\n') if line.strip()]
+    lines = [line.rstrip() for line in section_text.split('\n')]
     
-    print(f"   📋 Processing {len(lines)} lines...")
-    
-    # Skip header lines
-    i = 0
-    while i < len(lines):
-        if '書' in lines[i] and '名' in lines[i]:
-            i += 1
+    # Find header line with column names
+    header_idx = -1
+    for i, line in enumerate(lines):
+        if '書' in line and '名' in line:
+            header_idx = i
             break
-        i += 1
     
-    # Parse books
+    if header_idx == -1:
+        return []
+    
+    # Parse data lines starting after header
+    i = header_idx + 1
     while i < len(lines) and len(books) < 10:
         line = lines[i]
         
-        # Look for rank number at start
-        match = re.match(r'^(\d+)\s+(.+)$', line)
+        # Look for rank (1-10) at start
+        match = re.match(r'^(\d+)\s+', line)
         
         if not match:
             i += 1
             continue
         
         rank = int(match.group(1))
-        
         if rank < 1 or rank > 10:
             i += 1
             continue
         
-        # Get everything after rank
-        rest = match.group(2).strip()
-        
-        title = ""
-        author = ""
-        publisher = ""
-        price = ""
-        isbn = ""
-        
         # Collect all lines for this book entry
-        book_lines = [rest]
-        j = i + 1
+        book_data = [line]
+        i += 1
         
-        while j < len(lines):
-            next_line = lines[j]
+        # Continue until next rank or end
+        while i < len(lines):
+            next_line = lines[i]
             
-            # Stop if next rank or section
+            # Stop at next rank or genre
             if re.match(r'^(\d+)\s+', next_line) or '【' in next_line:
                 break
             
-            book_lines.append(next_line)
-            j += 1
+            # Stop at page marker or section separator
+            if 'トーハン' in next_line or next_line.strip() == '':
+                if i + 1 < len(lines) and re.match(r'^(\d+)\s+', lines[i + 1]):
+                    i += 1
+                    break
+            
+            book_data.append(next_line)
+            i += 1
         
-        # Join all lines for this book
-        full_entry = ' '.join(book_lines)
-        
-        # Now parse: Title Author Publisher Price ISBN
-        # Author usually has ／著 or ／原作 or ／漫画
-        # Price is always digits with optional commas
-        # ISBN starts with 978-
-        
-        # Extract ISBN (ends the entry)
-        isbn_match = re.search(r'(978-[\d-]+)$', full_entry)
-        if isbn_match:
-            isbn = isbn_match.group(1)
-            full_entry = full_entry[:isbn_match.start()].strip()
-        
-        # Extract PRICE (last sequence of digits/commas before end or ISBN)
-        price_match = re.search(r'([\d,]+)\s*$', full_entry)
-        if price_match:
-            price = price_match.group(1)
-            full_entry = full_entry[:price_match.start()].strip()
-        
-        # Extract AUTHOR (contains ／著, ／原作, ／漫画, ／作 etc)
-        author_match = re.search(r'([^／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト)[^\／]*)', full_entry)
-        if author_match:
-            author = author_match.group(1).strip()
-            # Remove author part from entry
-            full_entry = full_entry[:author_match.start()].strip() + ' ' + full_entry[author_match.end():].strip()
-            full_entry = full_entry.strip()
-        
-        # Split remaining by multiple spaces to get Publisher and Title
-        parts = re.split(r'\s{2,}|\t', full_entry)
-        
-        if len(parts) >= 2:
-            # Last non-empty part is publisher
-            publisher = parts[-1].strip()
-            # Everything else is title
-            title = ' '.join(parts[:-1]).strip()
-        else:
-            title = full_entry.strip()
-        
-        # Clean up
-        title = title.replace('\n', ' ').strip()
-        author = author.replace('\n', ' ').strip()
-        publisher = publisher.replace('\n', ' ').strip()
-        
-        if title:
-            books.append({
-                "rank": rank,
-                "title": title,
-                "author": author if author else "-",
-                "publisher": publisher if publisher else "-",
-                "price": price if price else "-",
-                "isbn": isbn if isbn else "-"
-            })
-            print(f"      ✓ Rank {rank}: {title}")
-        
-        i = j if j > i + 1 else i + 1
+        # Parse the book data
+        book = parse_book_entry(book_data, rank)
+        if book:
+            books.append(book)
+            print(f"      ✓ Rank {rank}: {book['title']}")
     
     return books
+
+def parse_book_entry(lines, rank):
+    """Parse a single book entry from multiple lines"""
+    
+    # Join all lines
+    full_text = ' '.join(line.strip() for line in lines if line.strip())
+    
+    # Remove rank number from start
+    full_text = re.sub(r'^(\d+)\s+', '', full_text).strip()
+    
+    # Extract ISBN (last element, starts with 978-)
+    isbn = ""
+    isbn_match = re.search(r'(978-[\d-]+)$', full_text)
+    if isbn_match:
+        isbn = isbn_match.group(1)
+        full_text = full_text[:isbn_match.start()].strip()
+    
+    # Extract PRICE (sequence of digits/commas before end or ISBN)
+    price = ""
+    price_match = re.search(r'([\d,]+)\s*$', full_text)
+    if price_match:
+        price = price_match.group(1)
+        full_text = full_text[:price_match.start()].strip()
+    
+    # Extract AUTHOR (contains ／著, ／原作, ／漫画, ���作, ／編, ／訳, ／監修, ／イラスト)
+    author = ""
+    author_match = re.search(
+        r'((?:[^\s／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト|ストーリー協力))+(?:\s+[^\s／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト|ストーリー協力))*)',
+        full_text
+    )
+    if author_match:
+        author = author_match.group(1).strip()
+        # Remove author from full_text
+        full_text = full_text[:author_match.start()].strip() + ' ' + full_text[author_match.end():].strip()
+        full_text = full_text.strip()
+    
+    # Remaining text: Publisher and Title
+    # Publisher is usually the last part after multiple spaces
+    parts = re.split(r'\s{2,}', full_text)
+    
+    if len(parts) >= 2:
+        # Last part is publisher
+        publisher = parts[-1].strip()
+        # Everything else is title
+        title = ' '.join(parts[:-1]).strip()
+    else:
+        # Only one part - it's the title
+        title = full_text.strip()
+        publisher = ""
+    
+    # Clean up
+    title = re.sub(r'\s+', ' ', title).strip()
+    author = re.sub(r'\s+', ' ', author).strip()
+    publisher = re.sub(r'\s+', ' ', publisher).strip()
+    
+    if not title:
+        return None
+    
+    return {
+        "rank": rank,
+        "title": title,
+        "author": author if author else "-",
+        "publisher": publisher if publisher else "-",
+        "price": price if price else "-",
+        "isbn": isbn if isbn else "-"
+    }
+
 def main():
     print("📚 Starting Tohan PDF Scraper...\n")
     
-    # Download PDF
     pdf_path = download_tohan_pdf(TOHAN_PDF_URL)
-    
     if not pdf_path:
-        logger.error("Failed to download PDF")
         return
     
-    # Parse PDF
     data = parse_tohan_pdf(pdf_path)
-    
     if not data:
-        logger.error("Failed to parse PDF")
         return
     
-    # Generate data.js
+    # Save data.js
     try:
         js_content = f"const oricon_data = {json.dumps(data, ensure_ascii=False, indent=2)};\n"
         
         with open('data.js', 'w', encoding='utf-8') as f:
             f.write(js_content)
         
-        print(f"\n✅ Successfully saved data.js")
+        print(f"✅ Successfully saved data.js")
         print(f"📊 Total genres: {len(data['genres'])}")
         
         total_books = 0
