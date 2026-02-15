@@ -61,58 +61,68 @@ def parse_tohan_pdf(pdf_path):
         with pdfplumber.open(pdf_path) as pdf:
             print(f"Total pages: {len(pdf.pages)}\n")
             
-            # Iterate through all pages
+            # Build full document with page positions
+            all_content = []
             for page_idx, page in enumerate(pdf.pages):
-                print(f"📄 Page {page_idx + 1}...")
-                
-                page_text = page.extract_text()
-                
-                # Find ALL genres mentioned on this page
-                genres_on_page = []
-                for genre in GENRES:
-                    if f"【{genre}】" in page_text:
-                        genres_on_page.append(genre)
-                        print(f"   Found genre: {genre}")
-                
-                # Extract tables from page
-                tables = page.extract_tables()
+                content = {
+                    "page": page_idx + 1,
+                    "text": page.extract_text(),
+                    "tables": page.extract_tables()
+                }
+                all_content.append(content)
+                print(f"📄 Page {page_idx + 1}: Found {len(content['tables'] or [])} tables")
+            
+            print()
+            
+            # Now process: for each table, find the closest genre marker before it
+            for page_content in all_content:
+                page_text = page_content['text']
+                tables = page_content['tables'] or []
                 
                 if not tables:
                     continue
                 
-                # Assign tables to genres found on page
-                # Tables should be in order matching genres
-                table_count = 0
-                for genre_idx, genre in enumerate(genres_on_page):
-                    if table_count >= len(tables):
-                        break
-                    
-                    table = tables[table_count]
-                    
+                # Find all genre positions in page text
+                genre_positions = {}
+                for genre in GENRES:
+                    marker = f"【{genre}】"
+                    pos = page_text.find(marker)
+                    if pos != -1:
+                        genre_positions[pos] = genre
+                        print(f"Page {page_content['page']}: Found 【{genre}】")
+                
+                # Process each table
+                for table_idx, table in enumerate(tables):
                     if not table or len(table) < 2:
-                        table_count += 1
                         continue
                     
-                    # Get headers
                     headers = table[0]
                     
-                    # Check if this is a ranking table
                     if not is_ranking_table(headers):
-                        table_count += 1
                         continue
                     
-                    print(f"   Processing table for: {genre}")
+                    # Find closest genre marker before this table
+                    # This is a bit tricky - we assume tables appear in order after their genre marker
+                    if genre_positions:
+                        # Get the last genre found (closest one)
+                        closest_genre = list(genre_positions.values())[-1]
+                    else:
+                        continue
+                    
+                    print(f"Page {page_content['page']}: Processing table for 【{closest_genre}】")
                     
                     # Parse table rows
                     books = parse_table_rows(table[1:])
                     
-                    if books:
-                        data["genres"][genre] = books
-                        print(f"   ✅ {len(books)} books extracted")
-                    
-                    table_count += 1
-                
-                print()
+                    if books and closest_genre not in data["genres"]:
+                        data["genres"][closest_genre] = books
+                        print(f"   ✅ {len(books)} books extracted\n")
+                        
+                        # Remove this genre so we don't use it for next table
+                        for pos, genre in list(genre_positions.items()):
+                            if genre == closest_genre:
+                                del genre_positions[pos]
+                                break
         
         return data
     
@@ -121,7 +131,6 @@ def parse_tohan_pdf(pdf_path):
         import traceback
         traceback.print_exc()
         return None
-
 def find_genre_in_page(page, genres):
     """Find genre marker in page text"""
     text = page.extract_text()
