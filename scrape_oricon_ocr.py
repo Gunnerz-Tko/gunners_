@@ -9,14 +9,13 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import easyocr
+import pytesseract
 from PIL import Image
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configuration des URLs Oricon
 ORICON_URLS = {
     "Comics": "https://www.oricon.co.jp/rank/obc/w/2026-02-16/",
     "Paperback": "https://www.oricon.co.jp/rank/obb/w/2026-02-16/",
@@ -43,8 +42,8 @@ def setup_driver():
     
     return driver
 
-def scrape_oricon_page(url, genre, reader):
-    """Scrape Oricon page with EasyOCR"""
+def scrape_oricon_page(url, genre):
+    """Scrape Oricon page with Tesseract OCR"""
     print(f"\n🔄 Scraping {genre}...")
     
     driver = None
@@ -64,14 +63,14 @@ def scrape_oricon_page(url, genre, reader):
         screenshot_path = f'/tmp/oricon_{genre}.png'
         driver.save_screenshot(screenshot_path)
         
-        print(f"   📸 Screenshot saved: {screenshot_path}")
+        print(f"   📸 Screenshot saved")
         
-        # EasyOCR extraction (Japanese + English)
-        print(f"   🔍 Running EasyOCR on image...")
-        results = reader.readtext(screenshot_path, detail=1)
+        # Tesseract OCR (Japanese config)
+        print(f"   🔍 Running Tesseract OCR...")
+        image = Image.open(screenshot_path)
         
-        # Convert OCR results to text
-        ocr_text = "\n".join([text[1] for text in results])
+        # Use jpn config for better Japanese recognition
+        ocr_text = pytesseract.image_to_string(image, lang='jpn')
         
         print(f"   📝 OCR text extracted ({len(ocr_text)} chars)")
         
@@ -79,6 +78,10 @@ def scrape_oricon_page(url, genre, reader):
         books = parse_ocr_text(ocr_text)
         
         print(f"   ✅ {genre}: {len(books)} books extracted")
+        
+        # Log first book for debugging
+        if books:
+            print(f"      Sample: Rank {books[0]['rank']} - {books[0]['title']}")
         
         if os.path.exists(screenshot_path):
             os.remove(screenshot_path)
@@ -96,77 +99,88 @@ def scrape_oricon_page(url, genre, reader):
             driver.quit()
 
 def parse_ocr_text(ocr_text):
-    """Parse EasyOCR text to extract book rankings
+    """Parse Tesseract OCR text to extract book rankings
     
-    Format expected:
+    Expected format from Oricon:
     1
     チェンソーマン 23
     藤本タツキ
     集英社
     2026年02月
-    572円(税込)
+    572円
     81,020
+    
+    2
+    ...
     """
     books = []
     lines = [line.strip() for line in ocr_text.split('\n') if line.strip()]
     
-    i = 0
+    print(f"   📋 Processing {len(lines)} OCR lines...")
     
-    while i < len(lines) and len(books) < 10:
+    i = 0
+    rank_found = 0
+    
+    while i < len(lines) and rank_found < 10:
         line = lines[i]
         
         # Look for rank number (1-10)
         rank_match = re.match(r'^(\d+)$', line)
         
         if rank_match:
-            rank = int(rank_match.group(1))
+            rank_num = int(rank_match.group(1))
             
-            if 1 <= rank <= 10:
-                # Next line should be title
+            if 1 <= rank_num <= 10:
+                print(f"      Found Rank {rank_num} at line {i}")
+                
+                # Title should be next
+                title = ""
+                author = ""
+                publisher = ""
+                sales = ""
+                
                 if i + 1 < len(lines):
                     title = lines[i + 1]
-                    
-                    # Next line should be author
-                    author = lines[i + 2] if i + 2 < len(lines) else "-"
-                    
-                    # Next line should be publisher
-                    publisher = lines[i + 3] if i + 3 < len(lines) else "-"
-                    
-                    # Skip date (i+4)
-                    # Skip price (i+5)
-                    
-                    # Sales should be at i+6
-                    sales = lines[i + 6] if i + 6 < len(lines) else "-"
-                    
-                    # Clean up sales (remove non-digits except comma)
+                
+                if i + 2 < len(lines):
+                    author = lines[i + 2]
+                
+                if i + 3 < len(lines):
+                    publisher = lines[i + 3]
+                
+                # Sales might be 3-4 lines after publisher
+                for j in range(i + 4, min(i + 8, len(lines))):
+                    line_check = lines[j]
+                    # Sales line contains numbers
+                    if re.search(r'\d{3,}', line_check):
+                        sales = line_check
+                        break
+                
+                # Validate and clean data
+                if title and len(title) > 2 and not re.match(r'^[\d\s]+$', title):
+                    # Clean sales (keep only digits and comma)
                     sales_clean = re.sub(r'[^\d,]', '', sales)
                     
-                    # Validate title (should not be empty or a number)
-                    if title and len(title) > 2 and not re.match(r'^\d+$', title):
-                        books.append({
-                            "rank": rank,
-                            "title": title,
-                            "author": author if author and author != "-" else "-",
-                            "publisher": publisher if publisher and publisher != "-" else "-",
-                            "sales": sales_clean if sales_clean else "-"
-                        })
-                        
-                        print(f"      Rank {rank}: {title} by {author}")
-                        i += 7
-                        continue
+                    books.append({
+                        "rank": rank_num,
+                        "title": title.strip(),
+                        "author": author.strip() if author else "-",
+                        "publisher": publisher.strip() if publisher else "-",
+                        "sales": sales_clean if sales_clean else "-"
+                    })
+                    
+                    print(f"         ✓ {title}")
+                    rank_found += 1
+                    i += 8
+                    continue
         
         i += 1
     
     return books
 
 def main():
-    print("📚 Starting Oricon OCR Scraper (EasyOCR)...\n")
+    print("📚 Starting Oricon OCR Scraper (Tesseract)...\n")
     print(f"⏰ Time: {datetime.now().isoformat()}\n")
-    
-    # Initialize EasyOCR reader (Japanese + English)
-    print("🚀 Initializing EasyOCR reader...")
-    reader = easyocr.Reader(['ja', 'en'], gpu=False)
-    print("✅ EasyOCR ready!\n")
     
     data = {
         "updated": datetime.now().isoformat() + "Z",
@@ -175,9 +189,9 @@ def main():
     }
     
     for genre, url in ORICON_URLS.items():
-        books = scrape_oricon_page(url, genre, reader)
+        books = scrape_oricon_page(url, genre)
         data["genres"][genre] = books
-        time.sleep(3)  # Be polite to Oricon
+        time.sleep(3)
     
     # Generate data.js
     try:
