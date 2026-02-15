@@ -20,11 +20,17 @@ jobs:
       
       - name: Install Python dependencies
         run: |
-          pip install pdfplumber requests
+          pip install pdfplumber requests google-generativeai
       
       - name: Run Tohan PDF scraper
         run: python scrape_tohan.py
         timeout-minutes: 10
+      
+      - name: Translate data with Gemini
+        run: python translate_tohan.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        timeout-minutes: 20
       
       - name: Commit and push changes
         run: |
@@ -34,6 +40,6 @@ jobs:
           if git diff --quiet && git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update Tohan rankings - $(date)"
+            git commit -m "Update Tohan rankings with translations - $(date)"
             git push
           fi
