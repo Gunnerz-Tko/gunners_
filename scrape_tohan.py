@@ -106,7 +106,13 @@ def parse_tohan_pdf(pdf_path):
         return None
 
 def parse_genre_section(section_text):
-    """Parse a genre section and extract book rankings"""
+    """Parse a genre section and extract book rankings
+    
+    Expected format:
+    1 Title Author Publisher Price ISBN
+    2 Title Author Publisher Price ISBN
+    ...
+    """
     books = []
     lines = [line.strip() for line in section_text.split('\n') if line.strip()]
     
@@ -116,64 +122,59 @@ def parse_genre_section(section_text):
     while i < len(lines) and len(books) < 10:
         line = lines[i]
         
-        # Look for rank number (1-10) at start of line
-        rank_match = re.match(r'^(\d+)\s+', line)
+        # Look for RANK number (1-10) at start of line
+        rank_match = re.match(r'^(\d+)\s+(.*)$', line)
         
         if rank_match:
             rank_num = int(rank_match.group(1))
             
             if 1 <= rank_num <= 10:
-                # Get the rest of the line after rank
-                rest_of_line = line[rank_match.end():].strip()
-                
-                # Title is the rest of this line
-                title = rest_of_line
-                
-                # Next line should be author (contains ／著 or ／作)
+                # Start collecting data for this book
+                title = ""
                 author = ""
                 publisher = ""
                 price = ""
                 isbn = ""
                 
-                if i + 1 < len(lines):
-                    next_line = lines[i + 1]
+                # Line i: RANK + remaining text
+                remaining = rank_match.group(2).strip()
+                
+                # Check if title is on same line
+                if remaining:
+                    title = remaining
+                    current_line = i + 1
+                else:
+                    # Title is on next line
+                    if i + 1 < len(lines):
+                        title = lines[i + 1]
+                    current_line = i + 2
+                
+                # Now collect author, publisher, price, ISBN from following lines
+                # until we hit another RANK or end
+                data_lines = []
+                j = current_line
+                while j < len(lines):
+                    next_line = lines[j]
                     
-                    # Check if it contains author marker
-                    if '／著' in next_line or '／作' in next_line:
-                        # Extract author (before the marker)
-                        if '／著' in next_line:
-                            author = next_line.split('／著')[0].strip()
-                        else:
-                            author = next_line.split('／作')[0].strip()
-                    else:
-                        # No author marker, might be author or publisher
-                        author = next_line
-                
-                # Next line should be publisher or price
-                if i + 2 < len(lines):
-                    next_line2 = lines[i + 2]
+                    # Check if this is a new RANK
+                    if re.match(r'^(\d+)\s+', next_line):
+                        break
                     
-                    if re.match(r'^[\d,]+$', next_line2):
-                        # This is price
-                        price = next_line2
-                        # Then publisher was at i+1
-                        publisher = author
-                        author = lines[i + 1]
-                    else:
-                        # This is publisher
-                        publisher = next_line2
+                    data_lines.append(next_line)
+                    j += 1
                 
-                # Next line should be price (if not already found)
-                if i + 3 < len(lines) and not price:
-                    next_line3 = lines[i + 3]
-                    if re.match(r'^[\d,]+$', next_line3):
-                        price = next_line3
+                # Parse data_lines: author, publisher, price, isbn
+                if len(data_lines) > 0:
+                    author = data_lines[0]
                 
-                # Next line should be ISBN (if found)
-                if i + 4 < len(lines):
-                    next_line4 = lines[i + 4]
-                    if re.match(r'^978-', next_line4):
-                        isbn = next_line4
+                if len(data_lines) > 1:
+                    publisher = data_lines[1]
+                
+                if len(data_lines) > 2:
+                    price = data_lines[2]
+                
+                if len(data_lines) > 3:
+                    isbn = data_lines[3]
                 
                 # Validate data
                 if title and len(title) > 2:
@@ -186,9 +187,10 @@ def parse_genre_section(section_text):
                         "isbn": isbn.strip() if isbn else "-"
                     })
                     
-                    print(f"      ✓ Rank {rank_num}: {title}")
-                    i += 5
-                    continue
+                    print(f"      ✓ Rank {rank_num}: {title} | {author}")
+                
+                i = j
+                continue
         
         i += 1
     
