@@ -14,20 +14,20 @@ logger = logging.getLogger(__name__)
 TOHAN_PDF_URL = "https://www.tohan.jp/wp/wp-content/uploads/2026/02/202601.pdf"
 
 # Genre mapping (Japanese to English)
-GENRES = {
-    "総合": "Overall",
-    "文芸書": "Literary",
-    "ノンフィクション・ライトエッセイ": "Non-Fiction",
-    "エンターテイメント": "Entertainment",
-    "ビジネス書": "Business",
-    "趣味実用書": "Hobby & Practical",
-    "生活実用書": "Life & Practical",
-    "児童書": "Children",
-    "ノベルス": "Novels",
-    "新書": "New Books",
-    "文庫": "Bunko",
-    "コミックス": "Comics"
-}
+GENRES = [
+    "総合",
+    "文芸書",
+    "ノンフィクション・ライトエッセイ",
+    "エンターテイメント",
+    "ビジネス書",
+    "趣味実用書",
+    "生活実用書",
+    "児童書",
+    "ノベルス",
+    "新書",
+    "文庫",
+    "コミックス"
+]
 
 def download_tohan_pdf(url):
     """Download Tohan PDF"""
@@ -48,7 +48,7 @@ def download_tohan_pdf(url):
         return None
 
 def parse_tohan_pdf(pdf_path):
-    """Parse Tohan PDF and extract rankings using tables"""
+    """Parse Tohan PDF and extract rankings using pdfplumber tables"""
     print("\n📖 Parsing Tohan PDF with table extraction...\n")
     
     data = {
@@ -61,41 +61,42 @@ def parse_tohan_pdf(pdf_path):
         with pdfplumber.open(pdf_path) as pdf:
             print(f"Total pages: {len(pdf.pages)}\n")
             
-            # Extract text from all pages
-            full_text = ""
-            for page in pdf.pages:
-                full_text += page.extract_text() + "\n"
-            
-            # Split by genre
-            for genre_jp, genre_en in GENRES.items():
-                print(f"🔍 Extracting {genre_jp} ({genre_en})...")
+            # Iterate through all pages
+            for page_idx, page in enumerate(pdf.pages):
+                print(f"📄 Page {page_idx + 1}...")
                 
-                # Find genre section
-                genre_pattern = f"【{genre_jp}】"
+                # Extract tables from page
+                tables = page.extract_tables()
                 
-                if genre_pattern in full_text:
-                    # Find section start
-                    start_idx = full_text.find(genre_pattern)
+                if not tables:
+                    continue
+                
+                # Process each table on page
+                for table in tables:
+                    if not table or len(table) < 2:
+                        continue
                     
-                    # Find next genre or end
-                    next_genre_idx = len(full_text)
-                    for other_jp in GENRES.keys():
-                        if other_jp != genre_jp:
-                            idx = full_text.find(f"【{other_jp}】", start_idx + 1)
-                            if idx != -1 and idx < next_genre_idx:
-                                next_genre_idx = idx
+                    # Get headers
+                    headers = table[0]
                     
-                    # Extract genre section
-                    genre_section = full_text[start_idx:next_genre_idx]
+                    # Check if this is a ranking table
+                    if not is_ranking_table(headers):
+                        continue
                     
-                    # Parse rankings
-                    books = parse_genre_section(genre_section)
+                    # Get genre from context (need to find it from page text)
+                    genre = find_genre_in_page(page, GENRES)
                     
-                    data["genres"][genre_jp] = books
-                    print(f"   ✅ {len(books)} books extracted\n")
-                else:
-                    print(f"   ⚠️  Genre not found\n")
-                    data["genres"][genre_jp] = []
+                    if not genre:
+                        continue
+                    
+                    print(f"   Found table for: {genre}")
+                    
+                    # Parse table rows
+                    books = parse_table_rows(table[1:])
+                    
+                    if books:
+                        data["genres"][genre] = books
+                        print(f"   ✅ {len(books)} books extracted")
         
         return data
     
@@ -105,107 +106,67 @@ def parse_tohan_pdf(pdf_path):
         traceback.print_exc()
         return None
 
-def parse_genre_section(section_text):
-    """Parse a genre section and extract book rankings
+def is_ranking_table(headers):
+    """Check if table headers indicate a ranking table"""
+    if not headers:
+        return False
     
-    Structure:
-    【Genre】
-    書 名 著 者 出版社 本体(円) ISBNコード
-    1 Title Author Publisher Price ISBN
-    2 Title Author Publisher Price ISBN
-    ...
-    """
+    headers_str = ' '.join([str(h).strip() for h in headers if h])
+    
+    # Look for ranking columns
+    keywords = ['書名', '著者', '出版社', '本体', 'ISBN']
+    matched = sum(1 for kw in keywords if kw in headers_str)
+    
+    return matched >= 3
+
+def find_genre_in_page(page, genres):
+    """Find genre marker in page text"""
+    text = page.extract_text()
+    
+    for genre in genres:
+        if f"【{genre}】" in text:
+            return genre
+    
+    return None
+
+def parse_table_rows(rows):
+    """Parse table rows into book data"""
     books = []
-    lines = [line.strip() for line in section_text.split('\n') if line.strip()]
     
-    print(f"   📋 Processing {len(lines)} lines...")
-    
-    rank = None
-    title = None
-    author = None
-    publisher = None
-    price = None
-    isbn = None
-    
-    for line in lines:
-        # Skip header lines
-        if '書 名' in line or '著 者' in line or '出版社' in line or '本体(円)' in line or 'ISBNコード' in line:
+    for row in rows:
+        if not row or len(row) < 2:
             continue
         
-        if line.startswith('【'):
-            # Genre marker, skip
+        # First column is rank
+        rank_str = str(row[0]).strip() if row[0] else ""
+        
+        if not rank_str or not rank_str.isdigit():
             continue
         
-        # Try to match: RANK + DATA
-        # Format: "1 Title Author Publisher Price ISBN"
-        match = re.match(r'^(\d+)\s+(.+)$', line)
+        rank = int(rank_str)
         
-        if match:
-            rank_num = int(match.group(1))
-            
-            if 1 <= rank_num <= 10:
-                # Save previous book if exists
-                if rank is not None and title:
-                    books.append({
-                        "rank": rank,
-                        "title": title.strip(),
-                        "author": author.strip() if author else "-",
-                        "publisher": publisher.strip() if publisher else "-",
-                        "price": price.strip() if price else "-",
-                        "isbn": isbn.strip() if isbn else "-"
-                    })
-                    print(f"      ✓ Rank {rank}: {title}")
-                
-                # Start new book
-                rank = rank_num
-                remaining_data = match.group(2).strip()
-                
-                # Split by common delimiters (multiple spaces, tabs)
-                parts = re.split(r'\s{2,}|\t', remaining_data)
-                
-                title = parts[0] if len(parts) > 0 else ""
-                author = parts[1] if len(parts) > 1 else ""
-                publisher = parts[2] if len(parts) > 2 else ""
-                price = parts[3] if len(parts) > 3 else ""
-                isbn = parts[4] if len(parts) > 4 else ""
-        else:
-            # This might be continuation of previous data (multi-line)
-            # Try to detect what field this is
-            if re.match(r'^978-', line):
-                # This is ISBN
-                isbn = line
-            elif re.match(r'^[\d,]+$', line):
-                # This is PRICE
-                if not price:
-                    price = line
-                else:
-                    isbn = line
-            elif '社' in line or '出版' in line.lower():
-                # This might be publisher
-                if not publisher:
-                    publisher = line
-                else:
-                    isbn = line
-            elif not author and title:
-                # This might be author
-                author = line
-            elif not publisher and title and author:
-                # This might be publisher
-                publisher = line
-    
-    # Don't forget last book
-    if rank is not None and title:
+        if rank < 1 or rank > 10:
+            continue
+        
+        # Extract columns
+        title = str(row[1]).strip() if len(row) > 1 and row[1] else "-"
+        author = str(row[2]).strip() if len(row) > 2 and row[2] else "-"
+        publisher = str(row[3]).strip() if len(row) > 3 and row[3] else "-"
+        price = str(row[4]).strip() if len(row) > 4 and row[4] else "-"
+        isbn = str(row[5]).strip() if len(row) > 5 and row[5] else "-"
+        
         books.append({
             "rank": rank,
-            "title": title.strip(),
-            "author": author.strip() if author else "-",
-            "publisher": publisher.strip() if publisher else "-",
-            "price": price.strip() if price else "-",
-            "isbn": isbn.strip() if isbn else "-"
+            "title": title,
+            "author": author,
+            "publisher": publisher,
+            "price": price,
+            "isbn": isbn
         })
+        
         print(f"      ✓ Rank {rank}: {title}")
     
-    return books[:10]  # Return top 10
+    return books[:10]
 
 def main():
     print("📚 Starting Tohan PDF Scraper...\n")
