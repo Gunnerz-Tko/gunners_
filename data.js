@@ -1,5 +1,5 @@
 const oricon_data = {
-  "updated": "2026-02-15T15:31:44.290700Z",
+  "updated": "2026-02-15T15:37:12.538023Z",
   "source": "tohan.jp",
   "genres": {
     "総合": [
@@ -63,7 +63,7 @@ const oricon_data = {
         "rank": 8,
         "title": "―――――――― 小学館 282 978-4-09-802319-6",
         "author": "ト2026",
-        "publisher": "神宮館編集部／編著",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -71,7 +71,7 @@ const oricon_data = {
         "rank": 9,
         "title": "令和8年 神宮館 九星本暦 神宮館 700 978-4-86771-201-6",
         "author": "高島易断所本部／編纂",
-        "publisher": "木下昌美／監修 なん",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -79,7 +79,7 @@ const oricon_data = {
         "rank": 10,
         "title": "ドラゴン タッグ最強王図鑑 ばきび／イラスト 七 Gakken 1,400 978-4-05-206218-6",
         "author": "海ルシア／イラスト",
-        "publisher": "ゲッターズ飯田の五星三心占い2026",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       }
@@ -187,7 +187,7 @@ const oricon_data = {
         "rank": 3,
         "title": "朝日新聞出版 1,400 978-4-02-333463-2",
         "author": "さら聞けない 投資の超基本 彰太郎／監修",
-        "publisher": "ジョン･ストレルキー",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -195,7 +195,7 @@ const oricon_data = {
         "rank": 4,
         "title": "やりたいことが見つかる 世界の果てのカフェ ダイヤモンド社 1,600 978-4-478-12254-9",
         "author": "／著 鹿田昌美／訳",
-        "publisher": "サンクチュアリ出",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -203,7 +203,7 @@ const oricon_data = {
         "rank": 5,
         "title": "覚悟の磨き方 〜超訳 吉田松陰〜 池田貴将／編訳 1,500 978-4-86113-992-5",
         "author": "版",
-        "publisher": "嫌われる勇気 自己啓発の源流「アドラー」の教 岸見一郎／著 古賀",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -211,7 +211,7 @@ const oricon_data = {
         "rank": 6,
         "title": "ダイヤモンド社 1,600 978-4-478-02581-9",
         "author": "え 史健／著",
-        "publisher": "DIE WITH ZERO ビル･パーキンス／著",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -269,7 +269,7 @@ const oricon_data = {
         "rank": 3,
         "title": "朝日新聞出版 1,400 978-4-02-333463-2",
         "author": "さら聞けない 投資の超基本 彰太郎／監修",
-        "publisher": "ジョン･ストレルキー",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -277,7 +277,7 @@ const oricon_data = {
         "rank": 4,
         "title": "やりたいことが見つかる 世界の果てのカフェ ダイヤモンド社 1,600 978-4-478-12254-9",
         "author": "／著 鹿田昌美／訳",
-        "publisher": "サンクチュアリ出",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -285,7 +285,7 @@ const oricon_data = {
         "rank": 5,
         "title": "覚悟の磨き方 〜超訳 吉田松陰〜 池田貴将／編訳 1,500 978-4-86113-992-5",
         "author": "版",
-        "publisher": "嫌われる勇気 自己啓発の源流「アドラー」の教 岸見一郎／著 古賀",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -293,7 +293,7 @@ const oricon_data = {
         "rank": 6,
         "title": "ダイヤモンド社 1,600 978-4-478-02581-9",
         "author": "え 史健／著",
-        "publisher": "DIE WITH ZERO ビル･パーキンス／著",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -351,7 +351,7 @@ const oricon_data = {
         "rank": 3,
         "title": "朝日新聞出版 1,400 978-4-02-333463-2",
         "author": "さら聞けない 投資の超基本 彰太郎／監修",
-        "publisher": "ジョン･ストレルキー",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -359,7 +359,7 @@ const oricon_data = {
         "rank": 4,
         "title": "やりたいことが見つかる 世界の果てのカフェ ダイヤモンド社 1,600 978-4-478-12254-9",
         "author": "／著 鹿田昌美／訳",
-        "publisher": "サンクチュアリ出",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -367,7 +367,7 @@ const oricon_data = {
         "rank": 5,
         "title": "覚悟の磨き方 〜超訳 吉田松陰〜 池田貴将／編訳 1,500 978-4-86113-992-5",
         "author": "版",
-        "publisher": "嫌われる勇気 自己啓発の源流「アドラー」の教 岸見一郎／著 古賀",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -375,7 +375,7 @@ const oricon_data = {
         "rank": 6,
         "title": "ダイヤモンド社 1,600 978-4-478-02581-9",
         "author": "え 史健／著",
-        "publisher": "DIE WITH ZERO ビル･パーキンス／著",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -473,7 +473,7 @@ const oricon_data = {
         "rank": 8,
         "title": "つかめ!英語ダマン 英会話で世界にとびだせ!編 マガジンハウス 1,200 978-4-8387-3361-3",
         "author": "フン／まんが 呉華順／訳",
-        "publisher": "内田有美／文･絵 満留邦",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -481,7 +481,7 @@ const oricon_data = {
         "rank": 9,
         "title": "おせち 福音館書店 1,000 978-4-8340-8813-7",
         "author": "子／料理 三浦康子／監修",
-        "publisher": "ほねほねザウルス30 めざめよ! だいちをゆるが カバヤ食品株式会社／原",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -489,7 +489,7 @@ const oricon_data = {
         "rank": 10,
         "title": "案･監修 ぐるーぷ･アンモ 岩崎書店 980 978-4-265-82069-6",
         "author": "す巨大ブラキオ!",
-        "publisher": "ナイツ／作･絵",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       }
@@ -555,7 +555,7 @@ const oricon_data = {
         "rank": 8,
         "title": "つかめ!英語ダマン 英会話で世界にとびだせ!編 マガジンハウス 1,200 978-4-8387-3361-3",
         "author": "フン／まんが 呉華順／訳",
-        "publisher": "内田有美／文･絵 満留邦",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -563,7 +563,7 @@ const oricon_data = {
         "rank": 9,
         "title": "おせち 福音館書店 1,000 978-4-8340-8813-7",
         "author": "子／料理 三浦康子／監修",
-        "publisher": "ほねほねザウルス30 めざめよ! だいちをゆるが カバヤ食品株式会社／原",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -571,7 +571,7 @@ const oricon_data = {
         "rank": 10,
         "title": "案･監修 ぐるーぷ･アンモ 岩崎書店 980 978-4-265-82069-6",
         "author": "す巨大ブラキオ!",
-        "publisher": "ナイツ／作･絵",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       }
@@ -637,7 +637,7 @@ const oricon_data = {
         "rank": 8,
         "title": "つかめ!英語ダマン 英会話で世界にとびだせ!編 マガジンハウス 1,200 978-4-8387-3361-3",
         "author": "フン／まんが 呉華順／訳",
-        "publisher": "内田有美／文･絵 満留邦",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -645,7 +645,7 @@ const oricon_data = {
         "rank": 9,
         "title": "おせち 福音館書店 1,000 978-4-8340-8813-7",
         "author": "子／料理 三浦康子／監修",
-        "publisher": "ほねほねザウルス30 めざめよ! だいちをゆるが カバヤ食品株式会社／原",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       },
@@ -653,7 +653,7 @@ const oricon_data = {
         "rank": 10,
         "title": "案･監修 ぐるーぷ･アンモ 岩崎書店 980 978-4-265-82069-6",
         "author": "す巨大ブラキオ!",
-        "publisher": "ナイツ／作･絵",
+        "publisher": "-",
         "price": "-",
         "isbn": "-"
       }
