@@ -116,20 +116,25 @@ def parse_genre_section(section_text):
     書 名 著者 出版社 本体(円) ISBNコード
     1 Title Author Publisher Price ISBN
     2 Title Author Publisher Price ISBN
+    ...
+    10 Title Author Publisher Price ISBN
     """
     books = []
     lines = [line.strip() for line in section_text.split('\n') if line.strip()]
     
-    # Skip header lines
+    print(f"   📋 Processing {len(lines)} lines...")
+    
+    # Skip header lines (書 名, 著者, etc)
     i = 0
     while i < len(lines):
-        if '書 名' in lines[i] or '著　者' in lines[i]:
+        if '書' in lines[i] and '名' in lines[i]:
             i += 1
             break
         i += 1
     
-    # Parse books (ranks 1-10)
-    while i < len(lines) and len(books) < 10:
+    # Parse books (ranks 1-20, but take only top 10)
+    rank_count = 0
+    while i < len(lines) and rank_count < 10:
         line = lines[i]
         
         # Look for rank number at start: "1 ", "2 ", etc.
@@ -141,6 +146,7 @@ def parse_genre_section(section_text):
         
         rank = int(match.group(1))
         
+        # Only process ranks 1-10
         if rank < 1 or rank > 10:
             i += 1
             continue
@@ -152,20 +158,23 @@ def parse_genre_section(section_text):
         # Pattern: Title  Author  Publisher  Price  ISBN
         parts = re.split(r'\s{2,}|\t', rest)
         
-        # Handle case where title or other fields span multiple lines
         title = parts[0] if len(parts) > 0 else ""
         author = parts[1] if len(parts) > 1 else ""
         publisher = parts[2] if len(parts) > 2 else ""
         price = parts[3] if len(parts) > 3 else ""
         isbn = parts[4] if len(parts) > 4 else ""
         
-        # Look ahead for continuation lines (when fields are split across lines)
+        # Look ahead for continuation lines
         j = i + 1
         while j < len(lines):
             next_line = lines[j]
             
-            # Stop if we hit next rank or section
-            if re.match(r'^(\d+)\s+', next_line) or '【' in next_line:
+            # Stop if we hit next rank
+            if re.match(r'^(\d+)\s+', next_line):
+                break
+            
+            # Stop if we hit next genre or section
+            if '【' in next_line:
                 break
             
             # Check what field this line belongs to
@@ -178,25 +187,16 @@ def parse_genre_section(section_text):
                     price = next_line
                 else:
                     isbn = next_line
-            elif not author:
-                # Continuation of author
-                author += " " + next_line
+            elif not author or (author == "" or "/" not in author):
+                # Likely author (contains ／)
+                if "/" in next_line or not author:
+                    author += " " + next_line if author else next_line
             elif not publisher:
                 # Continuation of publisher
                 publisher += " " + next_line
             elif not title:
                 # Continuation of title
                 title += " " + next_line
-            else:
-                # Unknown - could be any field
-                if "/" in next_line:
-                    # Likely author info
-                    if not author or len(author) < len(next_line):
-                        author = next_line
-                else:
-                    # Could be publisher
-                    if not publisher or len(publisher) < len(next_line):
-                        publisher = next_line
             
             j += 1
         
@@ -216,7 +216,8 @@ def parse_genre_section(section_text):
                 "price": price if price else "-",
                 "isbn": isbn if isbn else "-"
             })
-            print(f"   ✓ Rank {rank}: {title}")
+            print(f"      ✓ Rank {rank}: {title}")
+            rank_count += 1
         
         i = j if j > i + 1 else i + 1
     
