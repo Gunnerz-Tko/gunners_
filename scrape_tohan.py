@@ -109,22 +109,13 @@ def parse_tohan_pdf(pdf_path):
         return None
 
 def parse_genre_section(section_text):
-    """Parse a genre section and extract book rankings
-    
-    Format:
-    【Genre】
-    書 名 著者 出版社 本体(円) ISBNコード
-    1 Title Author Publisher Price ISBN
-    2 Title Author Publisher Price ISBN
-    ...
-    10 Title Author Publisher Price ISBN
-    """
+    """Parse a genre section and extract book rankings"""
     books = []
     lines = [line.strip() for line in section_text.split('\n') if line.strip()]
     
     print(f"   📋 Processing {len(lines)} lines...")
     
-    # Skip header lines (書 名, 著者, etc)
+    # Skip header lines
     i = 0
     while i < len(lines):
         if '書' in lines[i] and '名' in lines[i]:
@@ -132,12 +123,11 @@ def parse_genre_section(section_text):
             break
         i += 1
     
-    # Parse books (ranks 1-20, but take only top 10)
-    rank_count = 0
-    while i < len(lines) and rank_count < 10:
+    # Parse books
+    while i < len(lines) and len(books) < 10:
         line = lines[i]
         
-        # Look for rank number at start: "1 ", "2 ", etc.
+        # Look for rank number at start
         match = re.match(r'^(\d+)\s+(.+)$', line)
         
         if not match:
@@ -146,66 +136,76 @@ def parse_genre_section(section_text):
         
         rank = int(match.group(1))
         
-        # Only process ranks 1-10
         if rank < 1 or rank > 10:
             i += 1
             continue
         
-        # Get the rest of the line after rank
+        # Get everything after rank
         rest = match.group(2).strip()
         
-        # Split by multiple spaces or tabs to separate fields
-        # Pattern: Title  Author  Publisher  Price  ISBN
-        parts = re.split(r'\s{2,}|\t', rest)
+        title = ""
+        author = ""
+        publisher = ""
+        price = ""
+        isbn = ""
         
-        title = parts[0] if len(parts) > 0 else ""
-        author = parts[1] if len(parts) > 1 else ""
-        publisher = parts[2] if len(parts) > 2 else ""
-        price = parts[3] if len(parts) > 3 else ""
-        isbn = parts[4] if len(parts) > 4 else ""
-        
-        # Look ahead for continuation lines
+        # Collect all lines for this book entry
+        book_lines = [rest]
         j = i + 1
+        
         while j < len(lines):
             next_line = lines[j]
             
-            # Stop if we hit next rank
-            if re.match(r'^(\d+)\s+', next_line):
+            # Stop if next rank or section
+            if re.match(r'^(\d+)\s+', next_line) or '【' in next_line:
                 break
             
-            # Stop if we hit next genre or section
-            if '【' in next_line:
-                break
-            
-            # Check what field this line belongs to
-            if re.match(r'^978-', next_line):
-                # This is ISBN
-                isbn = next_line
-            elif re.match(r'^[\d,]+$', next_line):
-                # This is PRICE
-                if not price:
-                    price = next_line
-                else:
-                    isbn = next_line
-            elif not author or (author == "" or "/" not in author):
-                # Likely author (contains ／)
-                if "/" in next_line or not author:
-                    author += " " + next_line if author else next_line
-            elif not publisher:
-                # Continuation of publisher
-                publisher += " " + next_line
-            elif not title:
-                # Continuation of title
-                title += " " + next_line
-            
+            book_lines.append(next_line)
             j += 1
         
-        # Clean up fields
+        # Join all lines for this book
+        full_entry = ' '.join(book_lines)
+        
+        # Now parse: Title Author Publisher Price ISBN
+        # Author usually has ／著 or ／原作 or ／漫画
+        # Price is always digits with optional commas
+        # ISBN starts with 978-
+        
+        # Extract ISBN (ends the entry)
+        isbn_match = re.search(r'(978-[\d-]+)$', full_entry)
+        if isbn_match:
+            isbn = isbn_match.group(1)
+            full_entry = full_entry[:isbn_match.start()].strip()
+        
+        # Extract PRICE (last sequence of digits/commas before end or ISBN)
+        price_match = re.search(r'([\d,]+)\s*$', full_entry)
+        if price_match:
+            price = price_match.group(1)
+            full_entry = full_entry[:price_match.start()].strip()
+        
+        # Extract AUTHOR (contains ／著, ／原作, ／漫画, ／作 etc)
+        author_match = re.search(r'([^／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト)[^\／]*)', full_entry)
+        if author_match:
+            author = author_match.group(1).strip()
+            # Remove author part from entry
+            full_entry = full_entry[:author_match.start()].strip() + ' ' + full_entry[author_match.end():].strip()
+            full_entry = full_entry.strip()
+        
+        # Split remaining by multiple spaces to get Publisher and Title
+        parts = re.split(r'\s{2,}|\t', full_entry)
+        
+        if len(parts) >= 2:
+            # Last non-empty part is publisher
+            publisher = parts[-1].strip()
+            # Everything else is title
+            title = ' '.join(parts[:-1]).strip()
+        else:
+            title = full_entry.strip()
+        
+        # Clean up
         title = title.replace('\n', ' ').strip()
         author = author.replace('\n', ' ').strip()
         publisher = publisher.replace('\n', ' ').strip()
-        price = price.strip()
-        isbn = isbn.strip()
         
         if title:
             books.append({
@@ -217,12 +217,10 @@ def parse_genre_section(section_text):
                 "isbn": isbn if isbn else "-"
             })
             print(f"      ✓ Rank {rank}: {title}")
-            rank_count += 1
         
         i = j if j > i + 1 else i + 1
     
     return books
-
 def main():
     print("📚 Starting Tohan PDF Scraper...\n")
     
