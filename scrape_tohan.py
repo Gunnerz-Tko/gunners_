@@ -341,9 +341,14 @@ def parse_book_entry(lines, rank):
     isbn_match = re.search(r'(978[\d\-]{10,})', full_text)
     if isbn_match:
         isbn = isbn_match.group(1)
+        logger.info(f"Found ISBN: {isbn}")
+    
+    # Extract price before we modify the text
+    price = extract_price(full_text)
     
     # If we have ISBN, fetch data from Hanmoto
     if isbn:
+        logger.info(f"Fetching data from Hanmoto for ISBN {isbn}...")
         hanmoto_data = fetch_hanmoto_data(isbn)
         if hanmoto_data:
             return {
@@ -351,13 +356,12 @@ def parse_book_entry(lines, rank):
                 "title": hanmoto_data['title'],
                 "author": hanmoto_data['author'],
                 "publisher": hanmoto_data['publisher'],
-                "price": extract_price(full_text),
+                "price": price,
                 "isbn": isbn
             }
     
-    # Fallback: parse manually if Hanmoto fails or no ISBN
-    # ... (keep your existing fallback parsing logic here)
-    
+    # If no ISBN or Hanmoto failed, return minimal data
+    logger.warning(f"Could not fetch from Hanmoto for rank {rank}")
     return None
 
 def extract_price(text):
