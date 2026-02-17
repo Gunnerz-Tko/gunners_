@@ -1,5 +1,5 @@
 const oricon_data = {
-  "updated": "2026-02-17T05:11:22.480533Z",
+  "updated": "2026-02-17T05:15:03.457430Z",
   "source": "tohan.jp",
   "genres": {
     "総合": [
@@ -977,7 +977,7 @@ const oricon_data = {
         "price": "540",
         "isbn": "978-4-06-542095-9"
       },
-            {
+      {
         "rank": 10,
         "title": "メダリスト(14)",
         "author": "つるまいかだ／著",
