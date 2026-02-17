@@ -197,7 +197,7 @@ PUBLISHERS = [
     "マガジンハウス", "福音館書店", "岩崎書店", "ハーパーコリンズ･ジャパン",
     "文藝春秋", "新潮社", "双葉社", "飛鳥新社", "講談社", "東京創元社",
     "宝島社", "ダイヤモンド社", "東洋経済新報社", "朝日新聞出版", "新星出版社",
-    "中央公論新社", "集英社", "光文社", "クラーケンコミックス", "NHK出版"
+    "中央公論新社", "集英社", "光文社", "クラーケンコミックス", "NHK出版", "スイッチ･パブ"
 ]
 
 def parse_book_entry(lines, rank):
@@ -221,54 +221,44 @@ def parse_book_entry(lines, rank):
         full_text = full_text[:isbn_match.start()].strip() + ' ' + full_text[isbn_match.end():].strip()
         full_text = full_text.strip()
     
-      # Extract PRICE (must have a comma if 4+ digits, or 3 digits exactly)
-    price = ""
-    # Prix japonais: doit avoir une virgule si >= 1000 (ex: 1,000 ou 2,200)
-    # Sans virgule: max 3 chiffres (ex: 990, 880, 540)
-    price_match = re.search(r'\b([\d]{1,3}(?:,\d{3})*|\d{3})\b(?![\d\-])', full_text)
-    if price_match:
-        price_candidate = price_match.group(1)
-        # Vérifier que c'est un prix valide
-        # Prix avec virgule = OK
-        # 4 chiffres sans virgule = NON (c'est une année)
-        if ',' in price_candidate or (len(price_candidate.replace(',', '')) <= 3):
-            price = price_candidate
-            full_text = full_text[:price_match.start()].strip() + ' ' + full_text[price_match.end():].strip()
-            full_text = full_text.strip()
-    
     # Extract AUTHOR - always contains ／
-    # Can be: Name／著, Name／編著, Name／作, Name／原作, Name／漫画, etc.
-    # Multiple authors: Name1／著　Name2／著 or Name1／著　Name2／漫画
     author = ""
-    # Match: text with ／ followed by 著/編著/作/原作/漫画/編/訳/監修/イラスト/ストーリー協力
     author_pattern = r'([^\s／]+(?:／(?:著|編著|作|原作|漫画|編|訳|監修|イラスト|ストーリー協力))+(?:\s+[^\s／]+(?:／(?:著|編著|作|原作|漫画|編|訳|監修|イラスト|ストーリー協力))+)*)'
     author_match = re.search(author_pattern, full_text)
     
     if author_match:
         author = author_match.group(1).strip()
-        # Remove author from full_text
         full_text = full_text[:author_match.start()].strip() + ' ' + full_text[author_match.end():].strip()
         full_text = full_text.strip()
     
-    # Extract PUBLISHER (match known publishers or words ending with 社)
+    # Extract PRICE (must have comma if 4+ digits, or 3 digits exactly)
+    price = ""
+    price_match = re.search(r'\b([\d]{1,3}(?:,\d{3})*|\d{3})\b(?![\d\-])', full_text)
+    if price_match:
+        price_candidate = price_match.group(1)
+        if ',' in price_candidate or (len(price_candidate.replace(',', '')) <= 3):
+            price = price_candidate
+            full_text = full_text[:price_match.start()].strip() + ' ' + full_text[price_match.end():].strip()
+            full_text = full_text.strip()
+    
+    # Extract PUBLISHER (match known publishers FIRST, or words ending with 社/出版)
     publisher = ""
     
-    # First, try to match known publishers
-    for pub in sorted(PUBLISHERS, key=len, reverse=True):  # Longest first
+    # First, try to match known publishers (longest first)
+    for pub in sorted(PUBLISHERS, key=len, reverse=True):
         if pub in full_text:
             publisher = pub
-            # Remove publisher from full_text
             idx = full_text.find(pub)
             full_text = full_text[:idx].strip() + ' ' + full_text[idx + len(pub):].strip()
             full_text = full_text.strip()
             break
     
-    # If no known publisher found, look for word ending with 社
+    # If no known publisher found, look for patterns like "XXX出版" or "XXX･出版" or just words with 社/出版
     if not publisher:
-        society_match = re.search(r'(\S+社)', full_text)
+        # Match publishers with 出版 or 社
+        society_match = re.search(r'(\S+?(?:出版|社|パブ)(?:リッシング)?)', full_text)
         if society_match:
             publisher = society_match.group(1)
-            # Remove publisher from full_text
             full_text = full_text[:society_match.start()].strip() + ' ' + full_text[society_match.end():].strip()
             full_text = full_text.strip()
     
