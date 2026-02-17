@@ -193,13 +193,8 @@
     <script>
     let currentLanguage = 'en';
 
-    // Genre translations
-    const genreTranslations = {
-        "エンターテイメント": { en: "Entertainment", ja: "エンターテイメント", fr: "Divertissement" },
-        "児童書": { en: "Children", ja: "児童書", fr: "Jeunesse" },
-        "ノベルス": { en: "Novels", ja: "ノベルス", fr: "Romans" },
-
-       const translations = {
+        // Translations
+    const translations = {
         en: {
             title: 'Sakuragawa Japan Book Sales Report',
             subtitle: 'Monthly Rankings from Tohan',
@@ -230,7 +225,7 @@
         "文庫": { en: "Paperback", ja: "文庫", fr: "Poche" },
         "コミックス": { en: "Comics", ja: "コミックス", fr: "Comics" }
     };
-
+        
     function setLanguage(lang) {
         currentLanguage = lang;
         document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
