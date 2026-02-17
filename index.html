@@ -170,6 +170,7 @@
             display: none !important;
         }
     </style>
+        <script src="https://cdn.jsdelivr.net/npm/@google/generative-ai"></script>
 </head>
 <body>
     <header>
@@ -266,9 +267,107 @@
         const workflowUrl = 'https://github.com/Gunnerz-Tko/gunners_/actions/workflows/scrape-tohan.yml';
         window.open(workflowUrl, '_blank');
     }
-        function translateLiterally() {
-        // Open GitHub Actions page for translation workflow
-        const translationUrl = 'https://github.com/Gunnerz-Tko/gunners_/actions/workflows/scrape-tohan.yml';
+            async function translateLiterally() {
+        const geminiApiKey = prompt('Enter your Gemini API Key (get it from https://aistudio.google.com/app/apikey):');
+        if (!geminiApiKey) return;
+        
+        if (!confirm('Translate all data to English? This will take 1-2 minutes...')) {
+            return;
+        }
+        
+        const button = event.target;
+        button.disabled = true;
+        button.textContent = '⏳ Translating...';
+        
+        try {
+            const { GoogleGenerativeAI } = window;
+            const genAI = new GoogleGenerativeAI(geminiApiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+            
+            const translationCache = {};
+            
+            async function translateText(text, fieldType) {
+                if (!text || text === "-") return text;
+                
+                const cacheKey = `${fieldType}:${text}`;
+                if (translationCache[cacheKey]) {
+                    return translationCache[cacheKey];
+                }
+                
+                let prompt = `Translate this Japanese text to English. Return ONLY the translation:\n${text}`;
+                
+                if (fieldType === "title") {
+                    prompt = `Translate this Japanese book title to English. Use romanization where needed (e.g., 変な地図 = Hen na Chizu). Return ONLY the translation:\n${text}`;
+                } else if (fieldType === "author") {
+                    prompt = `Translate this Japanese author name to English. Keep original name order. Return ONLY the translation:\n${text}`;
+                } else if (fieldType === "publisher") {
+                    prompt = `Translate this Japanese publisher name to English. Return ONLY the translation:\n${text}`;
+                } else if (fieldType === "genre") {
+                    prompt = `Translate this Japanese genre name to English. Return ONLY the translation:\n${text}`;
+                }
+                
+                try {
+                    const result = await model.generateContent(prompt);
+                    const translation = result.response.text().trim();
+                    translationCache[cacheKey] = translation;
+                    
+                    // Log for debugging
+                    console.log(`✓ [${fieldType}] ${text} → ${translation}`);
+                    
+                    // Rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    
+                    return translation;
+                } catch (error) {
+                    console.error(`Error translating "${text}":`, error);
+                    return text;
+                }
+            }
+            
+            // Translate all data
+            const translatedData = {
+                updated: window.oricon_data.updated,
+                genres: {}
+            };
+            
+            let bookCount = 0;
+            for (const [genre, books] of Object.entries(window.oricon_data.genres)) {
+                button.textContent = `⏳ Translating... (${bookCount} books)`;
+                
+                const translatedGenre = await translateText(genre, "genre");
+                translatedData.genres[translatedGenre] = [];
+                
+                for (const book of books) {
+                    const translatedBook = {
+                        rank: book.rank,
+                        title: await translateText(book.title, "title"),
+                        author: await translateText(book.author, "author"),
+                        publisher: await translateText(book.publisher, "publisher"),
+                        price: book.price,
+                        isbn: book.isbn
+                    };
+                    translatedData.genres[translatedGenre].push(translatedBook);
+                    bookCount++;
+                }
+            }
+            
+            // Update global data
+            window.oricon_data = translatedData;
+            
+            // Refresh display
+            displayData();
+            
+            button.disabled = false;
+            button.textContent = '🌍 Translate Literally';
+            alert('✅ Translation complete!');
+            
+        } catch (error) {
+            console.error('Translation error:', error);
+            button.disabled = false;
+            button.textContent = '🌍 Translate Literally';
+            alert('❌ Translation failed:\n' + error.message);
+        }
+    }
         
         // Show confirmation
         if (confirm('This will translate all table data to English using Gemini. Continue?')) {
