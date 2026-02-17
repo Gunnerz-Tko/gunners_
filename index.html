@@ -193,7 +193,7 @@
     <script>
     let currentLanguage = 'en';
 
-        // Translations
+           // Translations
     const translations = {
         en: {
             title: 'Sakuragawa Japan Book Sales Report',
@@ -216,20 +216,19 @@
     };
 
     const genreTranslations = {
+        "総合": { en: "Overall", ja: "総合", fr: "Général" },
         "文芸書": { en: "Literary", ja: "文芸書", fr: "Littérature" },
-        "ノンフィクション・ライトエッセイ": { en: "Non-Fiction", ja: "ノンフィクション・ライトエッセイ", fr: "Non-Fiction" },
+        "ノンフィクション・ライトエッセイ": { en: "Non-Fiction", ja: "ノ���フィクション・ライトエッセイ", fr: "Non-Fiction" },
         "エンターテイメント": { en: "Entertainment", ja: "エンターテイメント", fr: "Divertissement" },
+        "ビジネス書": { en: "Business", ja: "ビジネス書", fr: "Commerce" },
+        "趣味実用書": { en: "Hobby & Practical", ja: "趣味実用書", fr: "Loisirs" },
+        "生活実用書": { en: "Life & Practical", ja: "生活実用書", fr: "Vie Pratique" },
         "児童書": { en: "Children", ja: "児童書", fr: "Jeunesse" },
         "ノベルス": { en: "Novels", ja: "ノベルス", fr: "Romans" },
         "新書": { en: "New Books", ja: "新書", fr: "Nouveaux Livres" },
         "文庫": { en: "Paperback", ja: "文庫", fr: "Poche" },
         "コミックス": { en: "Comics", ja: "コミックス", fr: "Comics" }
     };
-        
-    function setLanguage(lang) {
-        currentLanguage = lang;
-        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
         
         document.querySelector('header h1').textContent = translations[lang].title;
         document.querySelectorAll('header p')[0].textContent = translations[lang].subtitle;
