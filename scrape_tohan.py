@@ -191,16 +191,17 @@ def parse_book_entry(lines, rank):
     full_text = full_text.replace('―', '').replace('――――――――', '').strip()
     full_text = re.sub(r'\s+', ' ', full_text).strip()
     
-    # Extract ISBN (last element, starts with 978-)
+    # Extract ISBN (starts with 978- and has 10+ digits)
     isbn = ""
-    isbn_match = re.search(r'(978-[\d-]+)$', full_text)
+    isbn_match = re.search(r'(978[\d\-]{10,})', full_text)
     if isbn_match:
         isbn = isbn_match.group(1)
-        full_text = full_text[:isbn_match.start()].strip()
+        full_text = full_text[:isbn_match.start()].strip() + ' ' + full_text[isbn_match.end():].strip()
+        full_text = full_text.strip()
     
-    # Extract PRICE (sequence of digits/commas before end or ISBN)
+    # Extract PRICE (sequence of digits/commas, typically 2-5 digits)
     price = ""
-    price_match = re.search(r'([\d,]+)\s*$', full_text)
+    price_match = re.search(r'\b([\d,]{2,})\s*$', full_text)
     if price_match:
         price = price_match.group(1)
         full_text = full_text[:price_match.start()].strip()
