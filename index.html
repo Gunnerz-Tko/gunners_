@@ -257,7 +257,7 @@
     function refreshData() {
         displayDashboard(oricon_data);
     }
-    function displayDashboard(data) {
+       function displayDashboard(data) {
         const genres = Object.keys(data.genres || {});
         const tabsContainer = document.getElementById('tabsContainer');
         const contentContainer = document.getElementById('contentContainer');
@@ -265,19 +265,34 @@
         tabsContainer.innerHTML = '';
         contentContainer.innerHTML = '';
 
+        let literaryIndex = -1;
+        
         genres.forEach((genre, index) => {
             const btn = document.createElement('button');
-            btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+            btn.className = `tab-btn`;
             btn.textContent = genreTranslations[genre]?.[currentLanguage] || genre;
             btn.onclick = () => switchTab(genre);
             tabsContainer.appendChild(btn);
 
             const content = document.createElement('div');
-            content.className = `tab-content ${index === 0 ? 'active' : ''}`;
+            content.className = `tab-content`;
             content.id = `tab-${genre}`;
             content.innerHTML = renderBooks(data.genres[genre]);
             contentContainer.appendChild(content);
+            
+            // Track LITERARY tab
+            if (genre === "文芸書") {
+                literaryIndex = index;
+            }
         });
+
+        // Set LITERARY as active by default
+        if (literaryIndex !== -1) {
+            const buttons = tabsContainer.querySelectorAll('.tab-btn');
+            const contents = contentContainer.querySelectorAll('.tab-content');
+            buttons[literaryIndex].classList.add('active');
+            contents[literaryIndex].classList.add('active');
+        }
 
         try {
             const updateDate = new Date(data.updated);
