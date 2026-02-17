@@ -221,13 +221,20 @@ def parse_book_entry(lines, rank):
         full_text = full_text[:isbn_match.start()].strip() + ' ' + full_text[isbn_match.end():].strip()
         full_text = full_text.strip()
     
-    # Extract PRICE (3+ digits or digits with commas)
+      # Extract PRICE (must have a comma if 4+ digits, or 3 digits exactly)
     price = ""
-    price_match = re.search(r'\b([\d,]{3,}|\d{3,})\b(?![\d\-])', full_text)
+    # Prix japonais: doit avoir une virgule si >= 1000 (ex: 1,000 ou 2,200)
+    # Sans virgule: max 3 chiffres (ex: 990, 880, 540)
+    price_match = re.search(r'\b([\d]{1,3}(?:,\d{3})*|\d{3})\b(?![\d\-])', full_text)
     if price_match:
-        price = price_match.group(1)
-        full_text = full_text[:price_match.start()].strip() + ' ' + full_text[price_match.end():].strip()
-        full_text = full_text.strip()
+        price_candidate = price_match.group(1)
+        # Vérifier que c'est un prix valide
+        # Prix avec virgule = OK
+        # 4 chiffres sans virgule = NON (c'est une année)
+        if ',' in price_candidate or (len(price_candidate.replace(',', '')) <= 3):
+            price = price_candidate
+            full_text = full_text[:price_match.start()].strip() + ' ' + full_text[price_match.end():].strip()
+            full_text = full_text.strip()
     
     # Extract AUTHOR - always contains ／
     # Can be: Name／著, Name／編著, Name／作, Name／原作, Name／漫画, etc.
