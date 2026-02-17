@@ -313,7 +313,7 @@
         }
     }
 
-        function renderBooks(books) {
+            function renderBooks(books) {
         if (!books || books.length === 0) {
             return '<p style="text-align: center; color: #999; padding: 40px;">No data available</p>';
         }
@@ -339,7 +339,13 @@
             html += `<td>${book.author || '-'}</td>`;
             html += `<td style="font-size: 0.9em;">${book.publisher || '-'}</td>`;
             html += `<td>${book.price || '-'}</td>`;
-            html += `<td style="font-size: 0.85em; font-family: monospace;">${book.isbn || '-'}</td>`;
+            html += `<td style="font-size: 0.85em; font-family: monospace;">`;
+            if (book.isbn && book.isbn !== '-') {
+                html += `<a href="https://www.honyaclub.com/shop/default.aspx?keyword=${encodeURIComponent(book.isbn)}" target="_blank" style="color: #6366f1; text-decoration: none; cursor: pointer; font-weight: 600;">${book.isbn}</a>`;
+            } else {
+                html += '-';
+            }
+            html += `</td>`;
             html += '</tr>';
         });
         html += '</tbody>';
