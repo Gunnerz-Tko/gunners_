@@ -1,5 +1,5 @@
 const oricon_data = {
-  "updated": "2026-02-17T01:00:46.330472Z",
+  "updated": "2026-02-17T01:13:19.349299Z",
   "source": "tohan.jp",
   "genres": {
     "総合": [
