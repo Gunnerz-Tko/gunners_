@@ -30,50 +30,43 @@ def fetch_hanmoto_data(isbn):
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, headers=headers, timeout=5)
         response.encoding = 'utf-8'
         
         if response.status_code != 200:
-            logger.warning(f"Hanmoto returned {response.status_code} for ISBN {isbn}")
             return None
         
         soup = BeautifulSoup(response.text, 'html.parser')
         
-        # Extract title - look for the main book title
+        # Extract title
         title = None
         title_elem = soup.find('h1', class_='bookTitle')
-        if not title_elem:
-            title_elem = soup.find('h1')
         if title_elem:
             title = title_elem.get_text(strip=True)
         
         # Extract author (著)
         author = "-"
-        for dt in soup.find_all('dt'):
-            if '著' in dt.get_text() or '編' in dt.get_text():
-                dd = dt.find_next('dd')
-                if dd:
-                    author = dd.get_text(strip=True)
-                    break
+        author_elem = soup.find('dt', string=re.compile(r'著'))
+        if author_elem:
+            author_dd = author_elem.find_next('dd')
+            if author_dd:
+                author = author_dd.get_text(strip=True)
         
         # Extract publisher (発行)
         publisher = "-"
-        for dt in soup.find_all('dt'):
-            if '発行' in dt.get_text():
-                dd = dt.find_next('dd')
-                if dd:
-                    publisher = dd.get_text(strip=True)
-                    break
+        publisher_elem = soup.find('dt', string=re.compile(r'発行'))
+        if publisher_elem:
+            publisher_dd = publisher_elem.find_next('dd')
+            if publisher_dd:
+                publisher = publisher_dd.get_text(strip=True)
         
         if title:
-            logger.info(f"✓ Hanmoto data for {isbn}: Title={title[:50]}, Author={author[:40]}, Publisher={publisher}")
             return {
                 'title': title,
                 'author': author,
                 'publisher': publisher
             }
         
-        logger.warning(f"Could not extract title from Hanmoto for ISBN {isbn}")
         return None
         
     except Exception as e:
@@ -274,41 +267,41 @@ PUBLISHERS = [
 ]
 
 def parse_book_entry(lines, rank):
-    """Parse a single book entry and fetch complete data from Hanmoto"""
-    
-    # Join all lines
+    """Parse a single book entry from PDF"""
     full_text = ' '.join(line.strip() for line in lines if line.strip())
-    
-    # Remove rank number from start
     full_text = re.sub(r'^(\d+)\s+', '', full_text).strip()
     
-    # Extract ISBN (highest priority)
+    if not full_text:
+        return None
+    
+    # Extract ISBN
     isbn = ""
     isbn_match = re.search(r'(978[\d\-]{10,})', full_text)
     if isbn_match:
         isbn = isbn_match.group(1)
-        logger.info(f"Found ISBN: {isbn}")
+        full_text = full_text[:isbn_match.start()].strip() + ' ' + full_text[isbn_match.end():].strip()
+        full_text = full_text.strip()
     
-    # Extract price before we modify the text
+    # Extract price
     price = extract_price(full_text)
+    if price != "-":
+        full_text = re.sub(r'\b' + re.escape(price) + r'\b', '', full_text).strip()
     
-    # If we have ISBN, fetch data from Hanmoto
-    if isbn:
-        logger.info(f"Fetching data from Hanmoto for ISBN {isbn}...")
-        hanmoto_data = fetch_hanmoto_data(isbn)
-        if hanmoto_data:
-            return {
-                "rank": rank,
-                "title": hanmoto_data['title'],
-                "author": hanmoto_data['author'],
-                "publisher": hanmoto_data['publisher'],
-                "price": price,
-                "isbn": isbn
-            }
+    # What remains is title, author, publisher
+    # For now, use full_text as title
+    title = full_text.strip()
     
-    # If no ISBN or Hanmoto failed, return minimal data
-    logger.warning(f"Could not fetch from Hanmoto for rank {rank}")
-    return None
+    if not title:
+        return None
+    
+    return {
+        "rank": rank,
+        "title": title,
+        "author": "-",
+        "publisher": "-",
+        "price": price,
+        "isbn": isbn
+    }
 
 def extract_price(text):
     """Extract price from text"""
