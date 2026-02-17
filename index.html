@@ -158,6 +158,17 @@
         td:first-child { text-align: center; font-weight: 700; color: #6366f1; font-size: 1.1em; }
         td { color: #64748b; }
         footer { text-align: center; padding: 30px 20px; color: rgba(255, 255, 255, 0.6); margin-top: 60px; }
+                /* Hide specific genres */
+        .tab-btn:nth-child(1),
+        .tab-content:nth-of-type(1),
+        .tab-btn:nth-child(5),
+        .tab-content:nth-of-type(5),
+        .tab-btn:nth-child(6),
+        .tab-content:nth-of-type(6),
+        .tab-btn:nth-child(7),
+        .tab-content:nth-of-type(7) {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
