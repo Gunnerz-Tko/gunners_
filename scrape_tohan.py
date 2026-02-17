@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 TOHAN_PDF_URL = "https://www.tohan.jp/wp/wp-content/uploads/2026/02/202601.pdf"
 
 GENRES = [
-    "総合",
     "文芸書",
     "ノンフィクション・ライトエッセイ",
     "エンターテイメント",
@@ -275,9 +274,8 @@ def parse_book_entry(lines, rank):
     }
 
 def correct_overall_from_other_genres(data):
-    """Correct OVERALL genre by checking other genres for matching books"""
-    if "総合" not in data["genres"]:
-        return data
+    """Not needed - OVERALL tab removed"""
+    return data
     
     overall_books = data["genres"]["総合"]
     
