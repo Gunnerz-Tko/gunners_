@@ -18,9 +18,13 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
-          pip install pdfplumber requests
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4 lxml
+      
+      - name: Run scraper
+        run: python scrape_tohan.py
       
       - name: Run Tohan PDF scraper
         run: python scrape_oricon_ocr.py
