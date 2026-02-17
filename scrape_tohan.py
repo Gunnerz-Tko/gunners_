@@ -267,37 +267,41 @@ PUBLISHERS = [
 ]
 
 def parse_book_entry(lines, rank):
-    """Parse a single book entry and fetch complete data from Hanmoto"""
-    
-    # Join all lines
+    """Parse a single book entry from PDF"""
     full_text = ' '.join(line.strip() for line in lines if line.strip())
-    
-    # Remove rank number from start
     full_text = re.sub(r'^(\d+)\s+', '', full_text).strip()
     
-    # Extract ISBN (highest priority)
+    if not full_text:
+        return None
+    
+    # Extract ISBN
     isbn = ""
     isbn_match = re.search(r'(978[\d\-]{10,})', full_text)
     if isbn_match:
         isbn = isbn_match.group(1)
+        full_text = full_text[:isbn_match.start()].strip() + ' ' + full_text[isbn_match.end():].strip()
+        full_text = full_text.strip()
     
-    # If we have ISBN, fetch data from Hanmoto
-    if isbn:
-        hanmoto_data = fetch_hanmoto_data(isbn)
-        if hanmoto_data:
-            return {
-                "rank": rank,
-                "title": hanmoto_data['title'],
-                "author": hanmoto_data['author'],
-                "publisher": hanmoto_data['publisher'],
-                "price": extract_price(full_text),
-                "isbn": isbn
-            }
+    # Extract price
+    price = extract_price(full_text)
+    if price != "-":
+        full_text = re.sub(r'\b' + re.escape(price) + r'\b', '', full_text).strip()
     
-    # Fallback: parse manually if Hanmoto fails or no ISBN
-    # ... (keep your existing fallback parsing logic here)
+    # What remains is title, author, publisher
+    # For now, use full_text as title
+    title = full_text.strip()
     
-    return None
+    if not title:
+        return None
+    
+    return {
+        "rank": rank,
+        "title": title,
+        "author": "-",
+        "publisher": "-",
+        "price": price,
+        "isbn": isbn
+    }
 
 def extract_price(text):
     """Extract price from text"""
