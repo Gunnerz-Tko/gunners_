@@ -199,7 +199,7 @@
         "児童書": { en: "Children", ja: "児童書", fr: "Jeunesse" },
         "ノベルス": { en: "Novels", ja: "ノベルス", fr: "Romans" },
 
-    const translations = {
+       const translations = {
         en: {
             title: 'Sakuragawa Japan Book Sales Report',
             subtitle: 'Monthly Rankings from Tohan',
@@ -207,17 +207,28 @@
             refresh: '🔄 Refresh'
         },
         ja: {
-            title: '桜川日本書籍売上レポート',
-            subtitle: 'トーハン月間ランキング',
+            title: 'サクラガワ 日本書籍売上レポート',
+            subtitle: 'トーハン月間ベストセラー',
             source: 'ソース：トーハン',
             refresh: '🔄 更新'
         },
         fr: {
-            title: 'Rapport de Ventes de Livres Sakuragawa Japon',
+            title: 'Rapport de Ventes de Livres Japonais',
             subtitle: 'Classements Mensuels de Tohan',
             source: 'Source : Tohan',
             refresh: '🔄 Actualiser'
         }
+    };
+
+    const genreTranslations = {
+        "文芸書": { en: "Literary", ja: "文芸書", fr: "Littérature" },
+        "ノンフィクション・ライトエッセイ": { en: "Non-Fiction", ja: "ノンフィクション・ライトエッセイ", fr: "Non-Fiction" },
+        "エンターテイメント": { en: "Entertainment", ja: "エンターテイメント", fr: "Divertissement" },
+        "児童書": { en: "Children", ja: "児童書", fr: "Jeunesse" },
+        "ノベルス": { en: "Novels", ja: "ノベルス", fr: "Romans" },
+        "新書": { en: "New Books", ja: "新書", fr: "Nouveaux Livres" },
+        "文庫": { en: "Paperback", ja: "文庫", fr: "Poche" },
+        "コミックス": { en: "Comics", ja: "コミックス", fr: "Comics" }
     };
 
     function setLanguage(lang) {
