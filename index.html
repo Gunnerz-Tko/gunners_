@@ -265,6 +265,16 @@
         const workflowUrl = 'https://github.com/Gunnerz-Tko/gunners_/actions/workflows/scrape-tohan.yml';
         window.open(workflowUrl, '_blank');
     }
+        function translateLiterally() {
+        // Open GitHub Actions page for translation workflow
+        const translationUrl = 'https://github.com/Gunnerz-Tko/gunners_/actions/workflows/scrape-tohan.yml';
+        
+        // Show confirmation
+        if (confirm('This will translate all table data to English using Gemini. Continue?')) {
+            alert('⏳ Translation started! This may take 2-3 minutes.\n\nGo to GitHub Actions to monitor progress:\n' + translationUrl);
+            window.open(translationUrl, '_blank');
+        }
+    }
        function displayDashboard(data) {
         const genres = Object.keys(data.genres || {});
         const tabsContainer = document.getElementById('tabsContainer');
