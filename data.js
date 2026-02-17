@@ -1,5 +1,5 @@
 const oricon_data = {
-  "updated": "2026-02-17T01:13:19.349299Z",
+  "updated": "2026-02-17T01:23:20.361600Z",
   "source": "tohan.jp",
   "genres": {
     "総合": [
@@ -61,8 +61,8 @@ const oricon_data = {
       },
       {
         "rank": 8,
-        "title": "ト2026 著",
-        "author": "神宮館編集部／編",
+        "title": "ト2026",
+        "author": "神宮館編集部／編著",
         "publisher": "小学館",
         "price": "282",
         "isbn": "978-4-09-802319-6"
@@ -201,8 +201,8 @@ const oricon_data = {
       },
       {
         "rank": 5,
-        "title": "なぜ生きる",
-        "author": "／著 高森顕徹／監修",
+        "title": "なぜ生きる ／著",
+        "author": "高森顕徹／監修",
         "publisher": "1万年堂出版",
         "price": "1,500",
         "isbn": "978-4-925253-01-7"
@@ -357,8 +357,8 @@ const oricon_data = {
       },
       {
         "rank": 4,
-        "title": "やりたいことが見つかる 世界の果てのカフェ サンクチュアリ出",
-        "author": "／著 鹿田昌美／訳",
+        "title": "やりたいことが見つかる 世界の果てのカフェ ／著 サンクチュアリ出",
+        "author": "鹿田昌美／訳",
         "publisher": "ダイヤモンド社",
         "price": "1,600",
         "isbn": "978-4-478-12254-9"
