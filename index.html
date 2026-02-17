@@ -103,7 +103,6 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        
         .tab {
             padding: 12px 20px;
             background: white;
@@ -188,7 +187,14 @@
     <div class="container">
         <div class="info-bar">
             <div class="week-info"><span id="weekInfo">Loading...</span></div>
-            <button class="refresh-btn" onclick="refreshData()">🔄 Refresh</button>
+                <div style="text-align: center; margin: 20px 0;">
+        <button onclick="translateLiterally()" style="padding: 10px 20px; margin: 5px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            🌍 Translate Literally
+        </button>
+        <button onclick="refreshData()" style="padding: 10px 20px; margin: 5px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+            🔄 Refresh Data
+        </button>
+    </div>
         </div>
 
         <div id="tabsContainer" class="tabs"></div>
