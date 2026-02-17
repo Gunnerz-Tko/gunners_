@@ -254,8 +254,30 @@
         displayDashboard(oricon_data);
     }
 
-    function refreshData() {
-        displayDashboard(oricon_data);
+       function refreshData() {
+        // Launch GitHub workflow
+        const token = prompt("Enter your GitHub token (with workflow permission):");
+        if (!token) return;
+        
+        fetch('https://api.github.com/repos/Gunnerz-Tko/gunners_/actions/workflows/scrape-tohan.yml/dispatches', {
+            method: 'POST',
+            headers: {
+                'Authorization': `token ${token}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                ref: 'main'
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('✅ Workflow launched! Check GitHub Actions in 1-2 minutes.');
+            } else {
+                alert('❌ Error: ' + response.statusText);
+            }
+        })
+        .catch(error => alert('Error: ' + error));
     }
        function displayDashboard(data) {
         const genres = Object.keys(data.genres || {});
