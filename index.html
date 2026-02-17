@@ -313,7 +313,7 @@
         }
     }
 
-    function renderBooks(books) {
+        function renderBooks(books) {
         if (!books || books.length === 0) {
             return '<p style="text-align: center; color: #999; padding: 40px;">No data available</p>';
         }
@@ -327,6 +327,7 @@
         html += '<th>Author</th>';
         html += '<th>Publisher</th>';
         html += '<th>Price</th>';
+        html += '<th>ISBN</th>';
         html += '</tr>';
         html += '</thead>';
         
@@ -338,6 +339,7 @@
             html += `<td>${book.author || '-'}</td>`;
             html += `<td style="font-size: 0.9em;">${book.publisher || '-'}</td>`;
             html += `<td>${book.price || '-'}</td>`;
+            html += `<td style="font-size: 0.85em; font-family: monospace;">${book.isbn || '-'}</td>`;
             html += '</tr>';
         });
         html += '</tbody>';
@@ -345,7 +347,6 @@
         
         return html;
     }
-
     function switchTab(genre) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
