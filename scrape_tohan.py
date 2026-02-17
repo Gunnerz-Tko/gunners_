@@ -211,21 +211,21 @@ def parse_book_entry(lines, rank):
         full_text = full_text.strip()
     
     # Extract PRICE (3+ digits or digits with commas)
-    # Examples: 500, 1,000, 1,700, 2,500
     price = ""
-    # Look for: digits with commas OR 3+ consecutive digits
     price_match = re.search(r'\b([\d,]{3,}|\d{3,})\b(?![\d\-])', full_text)
     if price_match:
         price = price_match.group(1)
         full_text = full_text[:price_match.start()].strip() + ' ' + full_text[price_match.end():].strip()
         full_text = full_text.strip()
     
-    # Extract AUTHOR (contains ／著, ／原作, ／漫画, ／作, ／編, ／訳, ／監修, ／イラスト)
+    # Extract AUTHOR - always contains ／
+    # Can be: Name／著, Name／編著, Name／作, Name／原作, Name／漫画, etc.
+    # Multiple authors: Name1／著　Name2／著 or Name1／著　Name2／漫画
     author = ""
-    author_match = re.search(
-        r'((?:[^\s／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト|ストーリー協力))+(?:\s+[^\s／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト|ストーリー協力))*)',
-        full_text
-    )
+    # Match: text with ／ followed by 著/編著/作/原作/漫画/編/訳/監修/イラスト/ストーリー協力
+    author_pattern = r'([^\s／]+(?:／(?:著|編著|作|原作|漫画|編|訳|監修|イラスト|ストーリー協力))+(?:\s+[^\s／]+(?:／(?:著|編著|作|原作|漫画|編|訳|監修|イラスト|ストーリー協力))+)*)'
+    author_match = re.search(author_pattern, full_text)
+    
     if author_match:
         author = author_match.group(1).strip()
         # Remove author from full_text
