@@ -108,17 +108,25 @@ def parse_genre_section(section_text):
     books = []
     lines = [line.rstrip() for line in section_text.split('\n')]
     
-    # Find header line with column names
+    # Find header line with column names (if it exists)
     header_idx = -1
     for i, line in enumerate(lines):
         if '書' in line and '名' in line:
             header_idx = i
             break
     
+    # If no header found, start from first line after genre marker
+    if header_idx == -1:
+        # Find the genre marker line
+        for i, line in enumerate(lines):
+            if '【' in line and '】' in line:
+                header_idx = i
+                break
+    
     if header_idx == -1:
         return []
     
-    # Parse data lines starting after header
+    # Parse data lines starting after header/genre marker
     i = header_idx + 1
     while i < len(lines) and len(books) < 10:
         line = lines[i]
@@ -131,6 +139,7 @@ def parse_genre_section(section_text):
             continue
         
         rank = int(match.group(1))
+        # Only process ranks 1-10
         if rank < 1 or rank > 10:
             i += 1
             continue
@@ -148,12 +157,14 @@ def parse_genre_section(section_text):
                 break
             
             # Stop at page marker or section separator
-            if 'トーハン' in next_line or next_line.strip() == '':
-                if i + 1 < len(lines) and re.match(r'^(\d+)\s+', lines[i + 1]):
-                    i += 1
-                    break
+            if 'トーハン' in next_line:
+                i += 1
+                break
             
-            book_data.append(next_line)
+            # Skip empty lines but continue
+            if next_line.strip():
+                book_data.append(next_line)
+            
             i += 1
         
         # Parse the book data
