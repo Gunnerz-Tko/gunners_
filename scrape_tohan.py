@@ -70,7 +70,28 @@ def fetch_hanmoto_data(isbn):
         return None
         
     except Exception as e:
-        logger.warning(f"Error fetching Hanmoto data for ISBN {isbn}: {e}")
+            if title:
+        return {
+            'title': title,
+            'author': author,
+            'publisher': publisher
+        }
+    
+    return None
+    
+except Exception as e:
+    logger.warning(f"Error fetching Hanmoto data for ISBN {isbn}: {e}")
+    return None
+
+
+def extract_price(text):
+    """Extract price from text"""
+    price_match = re.search(r'\b([\d]{1,3}(?:,\d{3})*|\d{3})\b(?![\d\-])', text)
+    if price_match:
+        price_candidate = price_match.group(1)
+        if ',' in price_candidate or (len(price_candidate.replace(',', '')) <= 3):
+            return price_candidate
+    return "-"
         return Nonedef fetch_hanmoto_data(isbn):
     """
     Fetch book details from Hanmoto using ISBN
