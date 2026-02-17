@@ -164,6 +164,19 @@ def parse_genre_section(section_text):
     
     return books
 
+# List of known publishers
+PUBLISHERS = [
+    "SBクリエイティブ", "KADOKAWA", "幸福の科学出版", "オレンジページ", "小学館",
+    "神宮館", "Gakken", "朝日新聞出版", "ワン･パブリッシング", "幻冬舎",
+    "日本経済新聞出版", "高橋書店", "ときわ総合サービス", "サンクチュアリ出版",
+    "1万年堂出版", "PHP研究所", "毎日新聞出版", "日経BP", "ブラウンズブックス",
+    "スイッチ･パブリッシング", "すばる舎", "サンマーク出版", "ワニブックス",
+    "マガジンハウス", "福音館書店", "岩崎書店", "ハーパーコリンズ･ジャパン",
+    "文藝春秋", "新潮社", "双葉社", "飛鳥新社", "講談社", "東京創元社",
+    "宝島社", "ダイヤモンド社", "東洋経済新報社", "朝日新聞出版", "新星出版社",
+    "中央公論新社", "集英社", "光文社", "クラーケンコミックス"
+]
+
 def parse_book_entry(lines, rank):
     """Parse a single book entry from multiple lines"""
     
@@ -187,7 +200,7 @@ def parse_book_entry(lines, rank):
         price = price_match.group(1)
         full_text = full_text[:price_match.start()].strip()
     
-    # Extract AUTHOR (contains ／著, ／原作, ／漫画, ���作, ／編, ／訳, ／監修, ／イラスト)
+    # Extract AUTHOR (contains ／著, ／原作, ／漫画, ／作, ／編, ／訳, ／監修, ／イラスト)
     author = ""
     author_match = re.search(
         r'((?:[^\s／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト|ストーリー協力))+(?:\s+[^\s／]*／(?:著|原作|漫画|作|編|訳|監修|イラスト|ストーリー協力))*)',
@@ -199,19 +212,30 @@ def parse_book_entry(lines, rank):
         full_text = full_text[:author_match.start()].strip() + ' ' + full_text[author_match.end():].strip()
         full_text = full_text.strip()
     
-    # Remaining text: Publisher and Title
-    # Publisher is usually the last part after multiple spaces
-    parts = re.split(r'\s{2,}', full_text)
+    # Extract PUBLISHER (match known publishers or words ending with 社)
+    publisher = ""
     
-    if len(parts) >= 2:
-        # Last part is publisher
-        publisher = parts[-1].strip()
-        # Everything else is title
-        title = ' '.join(parts[:-1]).strip()
-    else:
-        # Only one part - it's the title
-        title = full_text.strip()
-        publisher = ""
+    # First, try to match known publishers
+    for pub in sorted(PUBLISHERS, key=len, reverse=True):  # Longest first
+        if pub in full_text:
+            publisher = pub
+            # Remove publisher from full_text
+            idx = full_text.find(pub)
+            full_text = full_text[:idx].strip() + ' ' + full_text[idx + len(pub):].strip()
+            full_text = full_text.strip()
+            break
+    
+    # If no known publisher found, look for word ending with 社
+    if not publisher:
+        society_match = re.search(r'(\S+社)', full_text)
+        if society_match:
+            publisher = society_match.group(1)
+            # Remove publisher from full_text
+            full_text = full_text[:society_match.start()].strip() + ' ' + full_text[society_match.end():].strip()
+            full_text = full_text.strip()
+    
+    # What remains is the TITLE
+    title = full_text.strip()
     
     # Clean up
     title = re.sub(r'\s+', ' ', title).strip()
