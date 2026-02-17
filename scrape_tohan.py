@@ -13,9 +13,13 @@ logger = logging.getLogger(__name__)
 TOHAN_PDF_URL = "https://www.tohan.jp/wp/wp-content/uploads/2026/02/202601.pdf"
 
 GENRES = [
+    "総合",
     "文芸書",
     "ノンフィクション・ライトエッセイ",
     "エンターテイメント",
+    "ビジネス書",
+    "趣味実用書",
+    "生活実用書",
     "児童書",
     "ノベルス",
     "新書",
