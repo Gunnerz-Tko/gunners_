@@ -20,6 +20,7 @@ jobs:
       
       - name: Install Python dependencies
         run: |
+          pip install pdfplumber requests google-generativeai beautifulsoup4 lxml
           pip install pdfplumber requests google-generativeai
       
       - name: Run Tohan PDF scraper
