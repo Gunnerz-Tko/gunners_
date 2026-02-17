@@ -71,6 +71,67 @@ def fetch_hanmoto_data(isbn):
         
     except Exception as e:
         logger.warning(f"Error fetching Hanmoto data for ISBN {isbn}: {e}")
+        return Nonedef fetch_hanmoto_data(isbn):
+    """
+    Fetch book details from Hanmoto using ISBN
+    Returns: {title, author, publisher} or None if not found
+    """
+    try:
+        isbn_clean = isbn.replace('-', '')
+        url = f'https://www.hanmoto.com/bd/isbn/{isbn_clean}'
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=10)
+        response.encoding = 'utf-8'
+        
+        if response.status_code != 200:
+            logger.warning(f"Hanmoto returned {response.status_code} for ISBN {isbn}")
+            return None
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Extract title - look for the main book title
+        title = None
+        title_elem = soup.find('h1', class_='bookTitle')
+        if not title_elem:
+            title_elem = soup.find('h1')
+        if title_elem:
+            title = title_elem.get_text(strip=True)
+        
+        # Extract author (著)
+        author = "-"
+        for dt in soup.find_all('dt'):
+            if '著' in dt.get_text() or '編' in dt.get_text():
+                dd = dt.find_next('dd')
+                if dd:
+                    author = dd.get_text(strip=True)
+                    break
+        
+        # Extract publisher (発行)
+        publisher = "-"
+        for dt in soup.find_all('dt'):
+            if '発行' in dt.get_text():
+                dd = dt.find_next('dd')
+                if dd:
+                    publisher = dd.get_text(strip=True)
+                    break
+        
+        if title:
+            logger.info(f"✓ Hanmoto data for {isbn}: Title={title[:50]}, Author={author[:40]}, Publisher={publisher}")
+            return {
+                'title': title,
+                'author': author,
+                'publisher': publisher
+            }
+        
+        logger.warning(f"Could not extract title from Hanmoto for ISBN {isbn}")
+        return None
+        
+    except Exception as e:
+        logger.warning(f"Error fetching Hanmoto data for ISBN {isbn}: {e}")
         return None
         
 logging.basicConfig(level=logging.INFO)
