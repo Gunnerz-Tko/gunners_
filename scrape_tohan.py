@@ -165,6 +165,7 @@ def parse_genre_section(section_text):
     return books
 
 # List of known publishers
+# List of known publishers
 PUBLISHERS = [
     "SBクリエイティブ", "KADOKAWA", "幸福の科学出版", "オレンジページ", "小学館",
     "神宮館", "Gakken", "朝日新聞出版", "ワン･パブリッシング", "幻冬舎",
@@ -174,7 +175,7 @@ PUBLISHERS = [
     "マガジンハウス", "福音館書店", "岩崎書店", "ハーパーコリンズ･ジャパン",
     "文藝春秋", "新潮社", "双葉社", "飛鳥新社", "講談社", "東京創元社",
     "宝島社", "ダイヤモンド社", "東洋経済新報社", "朝日新聞出版", "新星出版社",
-    "中央公論新社", "集英社", "光文社", "クラーケンコミックス"
+    "中央公論新社", "集英社", "光文社", "クラーケンコミックス", "NHK出版"
 ]
 
 def parse_book_entry(lines, rank):
@@ -185,6 +186,10 @@ def parse_book_entry(lines, rank):
     
     # Remove rank number from start
     full_text = re.sub(r'^(\d+)\s+', '', full_text).strip()
+    
+    # Remove dash characters (―)
+    full_text = full_text.replace('―', '').replace('――――――――', '').strip()
+    full_text = re.sub(r'\s+', ' ', full_text).strip()
     
     # Extract ISBN (last element, starts with 978-)
     isbn = ""
