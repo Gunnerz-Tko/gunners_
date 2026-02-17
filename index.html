@@ -266,7 +266,13 @@
         const workflowUrl = 'https://github.com/Gunnerz-Tko/gunners_/actions/workflows/scrape-tohan.yml';
         window.open(workflowUrl, '_blank');
     }
-            async function translateLiterally() {
+               async function translateLiterally() {
+        // Check if data is loaded
+        if (!window.oricon_data || !window.oricon_data.genres) {
+            alert('❌ No data loaded! Click "Refresh Data" first to load the rankings.');
+            return;
+        }
+        
         if (!confirm('Transliterate all Japanese text to Romaji? This will take 1-2 minutes...')) {
             return;
         }
@@ -299,6 +305,50 @@
                 }
             }
             
+            // Transliterate all data
+            const transliteratedData = {
+                updated: window.oricon_data.updated || new Date().toISOString(),
+                genres: {}
+            };
+            
+            let bookCount = 0;
+            for (const [genre, books] of Object.entries(window.oricon_data.genres)) {
+                button.textContent = `⏳ Transliterating... (${bookCount} books)`;
+                
+                const transliteratedGenre = await transliterateText(genre);
+                transliteratedData.genres[transliteratedGenre] = [];
+                
+                for (const book of books) {
+                    const transliteratedBook = {
+                        rank: book.rank,
+                        title: await transliterateText(book.title),
+                        author: await transliterateText(book.author),
+                        publisher: await transliterateText(book.publisher),
+                        price: book.price,
+                        isbn: book.isbn
+                    };
+                    transliteratedData.genres[transliteratedGenre].push(transliteratedBook);
+                    bookCount++;
+                }
+            }
+            
+            // Update global data
+            window.oricon_data = transliteratedData;
+            
+            // Refresh display
+            displayData();
+            
+            button.disabled = false;
+            button.textContent = '🌍 Translate Literally';
+            alert('✅ Transliteration complete!');
+            
+        } catch (error) {
+            console.error('Transliteration error:', error);
+            button.disabled = false;
+            button.textContent = '🌍 Translate Literally';
+            alert('❌ Transliteration failed:\n' + error.message);
+        }
+    }
             // Transliterate all data
             const transliteratedData = {
                 updated: window.oricon_data.updated,
