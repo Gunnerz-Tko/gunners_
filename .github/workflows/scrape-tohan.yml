@@ -28,10 +28,10 @@ jobs:
         timeout-minutes: 10
       
       - name: Translate data with Gemini
-        run: python translate_tohan.py
+        run: python translate_tables.py
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        timeout-minutes: 20
+        timeout-minutes: 10
       
       - name: Commit and push changes
         run: |
