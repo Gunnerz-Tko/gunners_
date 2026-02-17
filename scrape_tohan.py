@@ -191,7 +191,7 @@ def parse_book_entry(lines, rank):
     full_text = full_text.replace('―', '').replace('――――――――', '').strip()
     full_text = re.sub(r'\s+', ' ', full_text).strip()
     
-    # Extract ISBN (starts with 978- and has 10+ digits)
+    # Extract ISBN (starts with 978 and has digits/dashes)
     isbn = ""
     isbn_match = re.search(r'(978[\d\-]{10,})', full_text)
     if isbn_match:
@@ -199,12 +199,15 @@ def parse_book_entry(lines, rank):
         full_text = full_text[:isbn_match.start()].strip() + ' ' + full_text[isbn_match.end():].strip()
         full_text = full_text.strip()
     
-    # Extract PRICE (sequence of digits/commas, typically 2-5 digits)
+    # Extract PRICE (3+ digits or digits with commas)
+    # Examples: 500, 1,000, 1,700, 2,500
     price = ""
-    price_match = re.search(r'\b([\d,]{2,})\s*$', full_text)
+    # Look for: digits with commas OR 3+ consecutive digits
+    price_match = re.search(r'\b([\d,]{3,}|\d{3,})\b(?![\d\-])', full_text)
     if price_match:
         price = price_match.group(1)
-        full_text = full_text[:price_match.start()].strip()
+        full_text = full_text[:price_match.start()].strip() + ' ' + full_text[price_match.end():].strip()
+        full_text = full_text.strip()
     
     # Extract AUTHOR (contains ／著, ／原作, ／漫画, ／作, ／編, ／訳, ／監修, ／イラスト)
     author = ""
