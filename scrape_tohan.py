@@ -124,8 +124,15 @@ def parse_genre_section(section_text):
     
     # Parse data lines starting after header/genre marker
     i = header_idx + 1
-    while i < len(lines) and len(books) < 10:
-        line = lines[i]
+    found_books = 0
+    
+    while i < len(lines) and found_books < 10:
+        line = lines[i].strip()
+        
+        # Skip empty lines at the beginning
+        if not line:
+            i += 1
+            continue
         
         # Look for rank (1-10) at start
         match = re.match(r'^(\d+)\s+', line)
@@ -135,8 +142,8 @@ def parse_genre_section(section_text):
             continue
         
         rank = int(match.group(1))
-        # Only process ranks 1-10
-        if rank < 1 or rank > 10:
+        # Only process ranks 1-10, in order
+        if rank != found_books + 1:
             i += 1
             continue
         
@@ -148,16 +155,19 @@ def parse_genre_section(section_text):
         while i < len(lines):
             next_line = lines[i]
             
-            # Stop at next rank or genre
-            if re.match(r'^(\d+)\s+', next_line) or '【' in next_line:
+            # Stop at next rank
+            if re.match(r'^(\d+)\s+', next_line):
                 break
             
-            # Stop at page marker or section separator
-            if 'トーハン' in next_line:
-                i += 1
+            # Stop at genre marker
+            if '【' in next_line and '】' in next_line:
                 break
             
-            # Skip empty lines but continue
+            # Stop at page marker
+            if 'トーハン' in next_line or '月間ベストセラー' in next_line:
+                break
+            
+            # Add non-empty lines
             if next_line.strip():
                 book_data.append(next_line)
             
@@ -167,7 +177,8 @@ def parse_genre_section(section_text):
         book = parse_book_entry(book_data, rank)
         if book:
             books.append(book)
-            print(f"      ✓ Rank {rank}: {book['title']}")
+            found_books += 1
+            print(f"      ✓ Rank {rank}: {book['title'][:50]}")
     
     return books
 
