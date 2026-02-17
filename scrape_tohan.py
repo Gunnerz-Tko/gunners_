@@ -274,6 +274,51 @@ def parse_book_entry(lines, rank):
         "isbn": isbn if isbn else "-"
     }
 
+def correct_overall_from_other_genres(data):
+    """Correct OVERALL genre by checking other genres for matching books"""
+    if "総合" not in data["genres"]:
+        return data
+    
+    overall_books = data["genres"]["総合"]
+    
+    # Build a reference map from all other genres
+    reference_map = {}  # title -> book data
+    
+    for genre, books in data["genres"].items():
+        if genre == "総合":
+            continue
+        
+        for book in books:
+            title = book["title"].lower().strip()
+            # Use this genre's data as reference if not already set
+            if title not in reference_map:
+                reference_map[title] = book.copy()
+    
+    # Correct overall books using reference map
+    corrected_books = []
+    for book in overall_books:
+        title = book["title"].lower().strip()
+        
+        # Check if this title exists in other genres
+        if title in reference_map:
+            ref_book = reference_map[title]
+            # Use reference data to fill in missing fields
+            corrected = {
+                "rank": book["rank"],
+                "title": ref_book["title"],  # Use correct title from other genre
+                "author": ref_book["author"] if ref_book["author"] != "-" else book["author"],
+                "publisher": ref_book["publisher"] if ref_book["publisher"] != "-" else book["publisher"],
+                "price": ref_book["price"] if ref_book["price"] != "-" else book["price"],
+                "isbn": ref_book["isbn"] if ref_book["isbn"] != "-" else book["isbn"]
+            }
+            corrected_books.append(corrected)
+        else:
+            # Keep original if no reference found
+            corrected_books.append(book)
+    
+    data["genres"]["総合"] = corrected_books
+    return data
+
 def main():
     print("📚 Starting Tohan PDF Scraper...\n")
     
@@ -284,6 +329,9 @@ def main():
     data = parse_tohan_pdf(pdf_path)
     if not data:
         return
+    
+    # Correct OVERALL genre using other genres
+    data = correct_overall_from_other_genres(data)
     
     # Save data.js
     try:
